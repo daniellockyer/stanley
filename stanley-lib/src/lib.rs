@@ -38,17 +38,18 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             return;
         }
 
-        println!("------------------------------------------------------------------");
-        println!("{:?} -> {:#?}", name, mir.return_ty);
-        println!("{} ----- {}", pre_string, post_string);
+        println!("{:?}\t{:?}\t{}\t{}", mir.return_ty, name, pre_string, post_string);
+
+        let pre_string_expression = parse_condition(pre_string);
+        let post_string_expression = parse_condition(post_string);
     }
 }
 
-fn parse_condition(condition: String) -> () {
-    /*match condition_parser::parse_E1(condition) {
+fn parse_condition(condition: String) -> bool {
+    match condition_parser::parse_Term(&*condition) {
         Ok(e) => e,
-        Err(e) => panic!("Error parsing condition \"{}\": {:?}", condition, e)
-    }*/
+        Err(e) => panic!("Error parsing condition \"{}\": \"{:?}\"", condition, e)
+    }
 }
 
 fn parse_attributes(attrs: &[syntax::codemap::Spanned<syntax::ast::Attribute_>]) -> (String, String) {
