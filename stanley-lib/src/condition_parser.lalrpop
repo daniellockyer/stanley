@@ -1,9 +1,44 @@
 use std::str::FromStr;
+use ast::*;
 grammar;
 
-//pub Term = { Num, Bool };
+pub Condition = { E9 };
 
-pub Term = { Bool };
-Bool: bool = r"[true,false]" => bool::from_str(<>).unwrap();
+E9: Expression = {
+    <op: UOP> <e: E9> => Expression::UnaryExpression( UnaryExpressionData {
+        op: op, e: Box::new(e)
+    })
+};
 
-//Num: i32 = r"[0-9]+" => i32::from_str(<>).unwrap();
+//BL: BooleanLiteral = {
+//	"true" => Expression::BooleanLiteral(true),
+//    "false" => Expression::BooleanLiteral(false)
+//};
+
+UOP: UnaryOperator = {
+    "-" => UnaryOperator::Negation,
+    "!" => UnaryOperator::BitwiseNot,
+    "NOT" => UnaryOperator::Not,
+};
+
+BOP: BinaryOperator = {
+    "+" => BinaryOperator::Addition,
+    "-" => BinaryOperator::Subtraction,
+    "*" => BinaryOperator::Multiplication,
+    "/" => BinaryOperator::Division,
+    "%" => BinaryOperator::Modulo
+};
+
+TYPE: Types = {
+    "bool" => Types::Bool,
+    "i8" => Types::I8,
+    "i16" => Types::I16,
+    "i32" => Types::I32,
+    "i64" => Types::I64,
+    "u8" => Types::U8,
+    "u16" => Types::U16,
+    "u32" => Types::U32,
+    "u64" => Types::U64,
+};
+
+IDENTIFIER: String = r"_[a-zA-Z0-9_]+" => String::from_str(<>).unwrap();

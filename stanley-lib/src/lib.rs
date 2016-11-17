@@ -12,6 +12,7 @@ extern crate rustc;
 extern crate rustc_plugin;
 extern crate rustc_trans;
 
+mod ast;
 mod condition_parser;
 
 use rustc_plugin::Registry;
@@ -19,7 +20,9 @@ use rustc::mir::*;
 use rustc::mir::transform::{Pass, MirPass, MirSource};
 use rustc::ty::TyCtxt;
 use syntax::feature_gate::AttributeType;
-use syntax::ast::{MetaItemKind, NestedMetaItemKind};
+use syntax::codemap::Spanned;
+use syntax::ast::{MetaItemKind, NestedMetaItemKind, Attribute_};
+use ast::Expression;
 
 struct StanleyMir;
 
@@ -45,35 +48,33 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
     }
 }
 
-fn parse_condition(condition: String) -> bool {
-    match condition_parser::parse_Term(&*condition) {
+fn parse_condition(condition: String) -> Expression {
+    match condition_parser::parse_Condition(&*condition) {
         Ok(e) => e,
         Err(e) => panic!("Error parsing condition \"{}\": \"{:?}\"", condition, e)
     }
 }
 
-fn parse_attributes(attrs: &[syntax::codemap::Spanned<syntax::ast::Attribute_>]) -> (String, String) {
+fn parse_attributes(attrs: &[Spanned<Attribute_>]) -> (String, String) {
     let mut pre_string = "".to_string();
     let mut post_string = "".to_string();
 
     for attr in attrs {
         if let MetaItemKind::List(ref attr_name, ref items) = attr.node.value.node {
+            if attr_name != "condition" {
+                continue;
+            }
+
             for item in items {
                 if let NestedMetaItemKind::MetaItem(ref i_string) = item.node {
-                    if let MetaItemKind::NameValue(ref i_string, ref literal) = i_string.node {
+                    if let MetaItemKind::NameValue(ref attr_param_name, ref literal) = i_string.node {
+                        if let syntax::ast::LitKind::Str(ref attr_param_value, _) = literal.node {
 
-                        match i_string.to_string().as_ref() {
-                            "pre" => {
-                                if let syntax::ast::LitKind::Str(ref i_string, _) = literal.node {
-                                    pre_string = i_string.to_string();
-                                }
-                            },
-                            "post" => {
-                                if let syntax::ast::LitKind::Str(ref i_string, _) = literal.node {
-                                    post_string = i_string.to_string();
-                                }
-                            },
-                            _ => panic!("I only accept `pre` and `post`. You gave me {}", i_string)
+                            match attr_param_name.to_string().as_ref() {
+                                "pre" => pre_string = attr_param_value.to_string(),
+                                "post" => post_string = attr_param_value.to_string(),
+                                _ => panic!("I only accept `pre` and `post`. You gave me \"{}\"", attr_param_name)
+                            }
                         }
                     }
                 }
