@@ -2,43 +2,25 @@ use std::str::FromStr;
 use ast::*;
 grammar;
 
-pub Condition = { E9 };
-
-E9: Expression = {
-    <op: UOP> <e: E9> => Expression::UnaryExpression( UnaryExpressionData {
-        op: op, e: Box::new(e)
-    })
+pub Condition: i32 = {
+    Expr
 };
 
-//BL: BooleanLiteral = {
-//	"true" => Expression::BooleanLiteral(true),
-//    "false" => Expression::BooleanLiteral(false)
-//};
-
-UOP: UnaryOperator = {
-    "-" => UnaryOperator::Negation,
-    "!" => UnaryOperator::BitwiseNot,
-    "NOT" => UnaryOperator::Not,
+Expr: i32 = {
+    <l:Expr> "+" <r:Factor> => l + r,
+    <l:Expr> "-" <r:Factor> => l - r,
+    Factor,
 };
 
-BOP: BinaryOperator = {
-    "+" => BinaryOperator::Addition,
-    "-" => BinaryOperator::Subtraction,
-    "*" => BinaryOperator::Multiplication,
-    "/" => BinaryOperator::Division,
-    "%" => BinaryOperator::Modulo
+Factor: i32 = {
+    <l:Factor> "*" <r:Term> => l * r,
+    <l:Factor> "/" <r:Term> => l / r,
+    Term,
 };
 
-TYPE: Types = {
-    "bool" => Types::Bool,
-    "i8" => Types::I8,
-    "i16" => Types::I16,
-    "i32" => Types::I32,
-    "i64" => Types::I64,
-    "u8" => Types::U8,
-    "u16" => Types::U16,
-    "u32" => Types::U32,
-    "u64" => Types::U64,
+Term: i32 = {
+    Num,
+    "(" <Expr> ")",
 };
 
-IDENTIFIER: String = r"_[a-zA-Z0-9_]+" => String::from_str(<>).unwrap();
+Num: i32 = r"[0-9]+" => i32::from_str(<>).unwrap();

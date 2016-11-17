@@ -44,11 +44,13 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         println!("{:?}\t{:?}\t{}\t{}", mir.return_ty, name, pre_string, post_string);
 
         let pre_string_expression = parse_condition(pre_string);
+        println!("{}", pre_string_expression);
         let post_string_expression = parse_condition(post_string);
+        println!("{}", post_string_expression);
     }
 }
 
-fn parse_condition(condition: String) -> Expression {
+fn parse_condition(condition: String) -> i32 {
     match condition_parser::parse_Condition(&*condition) {
         Ok(e) => e,
         Err(e) => panic!("Error parsing condition \"{}\": \"{:?}\"", condition, e)

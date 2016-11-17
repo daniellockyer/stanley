@@ -6,6 +6,12 @@
 fn main() {
 }
 
+#[condition(pre="(10 - 5 + 1 * 2) * 2", post="(5)")]
+fn param_minus_five(x: i32) -> i32 {
+    x - 5
+}
+
+/*
 #[condition(pre="true", post="ret sorted(xs)")]
 fn selection(xs: &mut [u32]) {
     let (mut i, len) = (0, xs.len());
@@ -50,3 +56,4 @@ fn boolean_not(x:bool) -> bool {
         true
     }
 }
+*/
