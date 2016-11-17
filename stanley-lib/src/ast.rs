@@ -1,26 +1,12 @@
+use std::fmt::{Debug, Formatter, Error};
+
 pub enum Expression {
-    BinaryExpression(BinaryExpressionData),
-    UnaryExpression(UnaryExpressionData),
+    BinaryExpression(Box<Expression>, BinaryOperator, Box<Expression>),
+    Number(i32),
     BooleanLiteral(bool),
 }
 
-pub struct BinaryExpressionData {
-    pub left: Box<Expression>,
-    pub op: BinaryOperator,
-    pub right: Box<Expression>
-}
-
-pub struct UnaryExpressionData {
-    pub op: UnaryOperator,
-    pub e: Box<Expression>
-}
-
-pub enum UnaryOperator {
-    Negation,
-    BitwiseNot,
-    Not
-}
-
+#[derive(Copy, Clone)]
 pub enum BinaryOperator {
     Addition,
     Subtraction,
@@ -29,14 +15,26 @@ pub enum BinaryOperator {
     Modulo
 }
 
-pub enum Types {
-    Bool,
-    I8,
-    I16,
-    I32,
-    I64,
-    U8,
-    U16,
-    U32,
-    U64
+impl Debug for Expression {
+    fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
+        use self::Expression::*;
+        match *self {
+            BinaryExpression(ref l, op, ref r) => write!(fmt, "({:?} {:?} {:?})", l, op, r),
+            Number(n) => write!(fmt, "{:?}", n),
+            BooleanLiteral(b) => write!(fmt, "{:?}", b)
+        }
+    }
+}
+
+impl Debug for BinaryOperator {
+    fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
+        use self::BinaryOperator::*;
+        match *self {
+            Addition => write!(fmt, "+"),
+            Subtraction => write!(fmt, "-"),
+            Multiplication => write!(fmt, "*"),
+            Division => write!(fmt, "/"),
+            Modulo => write!(fmt, "%"),
+        }
+    }
 }

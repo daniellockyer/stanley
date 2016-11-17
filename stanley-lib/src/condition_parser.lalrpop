@@ -2,25 +2,38 @@ use std::str::FromStr;
 use ast::*;
 grammar;
 
-pub Condition: i32 = {
-    Expr
-};
-
-Expr: i32 = {
-    <l:Expr> "+" <r:Factor> => l + r,
-    <l:Expr> "-" <r:Factor> => l - r,
+pub Condition: Box<Expression> = {
+    Condition ExprOp Factor => Box::new(Expression::BinaryExpression(<>)),
     Factor,
 };
 
-Factor: i32 = {
-    <l:Factor> "*" <r:Term> => l * r,
-    <l:Factor> "/" <r:Term> => l / r,
+Factor: Box<Expression> = {
+    Factor FactorOp Term => Box::new(Expression::BinaryExpression(<>)),
     Term,
 };
 
-Term: i32 = {
-    Num,
-    "(" <Expr> ")",
+Term: Box<Expression> = {
+    //Bool => Box::new(Expression::BooleanLiteral(<>)),
+    Num => Box::new(Expression::Number(<>)),
+    "(" <Condition> ")"
 };
+
+/////////////////////////////////////////////////////////////////////////////////////
+
+ExprOp: BinaryOperator = {
+    "+" => BinaryOperator::Addition,
+    "-" => BinaryOperator::Subtraction,
+};
+
+FactorOp: BinaryOperator = {
+    "*" => BinaryOperator::Multiplication,
+    "/" => BinaryOperator::Division,
+    "%" => BinaryOperator::Modulo,
+};
+
+//Bool: Box<bool> = {
+    //"true" => Box::new(Expression::BooleanExpression(true)),
+    //"false" => Box::new(Expression::BooleanExpression(false))
+//};
 
 Num: i32 = r"[0-9]+" => i32::from_str(<>).unwrap();

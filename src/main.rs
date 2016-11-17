@@ -6,7 +6,7 @@
 fn main() {
 }
 
-#[condition(pre="(10 - 5 + 1 * 2) * 2", post="(5)")]
+#[condition(pre="(10 - 5 + 1 * 2) * 2", post="(5 % 2)")]
 fn param_minus_five(x: i32) -> i32 {
     x - 5
 }
