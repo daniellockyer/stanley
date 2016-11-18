@@ -41,7 +41,7 @@ fn check_less_than_ten(x: i32) -> bool {
 fn check_less_than_five(x:i32) -> bool {
     x < 5
 }
-/*
+
 #[condition(pre="true", post="ret !x")]
 fn boolean_not(x:bool) -> bool {
     if x == true {
@@ -50,7 +50,7 @@ fn boolean_not(x:bool) -> bool {
         true
     }
 }
-
+/*
 #[condition(pre="x <= i32::MAX - 5:i32", post="ret == (x + 5:i32)")]
 fn add_five(x:i32) -> i32 {
     assert!(x <= std::i32::MAX - 5);
