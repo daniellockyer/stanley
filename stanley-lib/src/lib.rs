@@ -26,7 +26,7 @@ use ast::Expression;
 
 struct StanleyMir;
 
-impl <'tcx> Pass for StanleyMir{}
+impl <'tcx> Pass for StanleyMir {}
 
 impl <'tcx> MirPass<'tcx> for StanleyMir {
     fn run_pass<'a>(&mut self, tcx: TyCtxt<'a, 'tcx, 'tcx>, src: MirSource, mir: &mut Mir<'tcx>) {
