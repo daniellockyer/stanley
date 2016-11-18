@@ -25,7 +25,7 @@ fn check_less_than_five(x:i32) -> bool {
     x < 5
 }
 
-#[condition(pre="true", post="ret == (!x)")]
+#[condition(pre="true", post="ret == !x")]
 fn boolean_not(x:bool) -> bool {
     if x == true {
         false

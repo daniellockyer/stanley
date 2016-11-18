@@ -2,7 +2,6 @@
 //! preconditions and postconditions.
 
 #![feature(plugin_registrar, rustc_private)]
-#![allow(unused_variables, unused_mut)]
 
 extern crate z3;
 extern crate syntax;
@@ -16,15 +15,22 @@ mod ast;
 mod condition_parser;
 
 use rustc_plugin::Registry;
-use rustc::mir::*;
 use rustc::mir::transform::{Pass, MirPass, MirSource};
-use rustc::ty::TyCtxt;
+use rustc::mir::{LocalDecl, Mir, BasicBlockData, BasicBlock};
+use rustc::ty::{TyCtxt, Ty};
 use syntax::feature_gate::AttributeType;
 use syntax::codemap::Spanned;
 use syntax::ast::{MetaItemKind, NestedMetaItemKind, Attribute_};
 use ast::Expression;
 
 struct StanleyMir;
+
+pub struct MirData<'tcx> {
+    block_data: Vec<&'tcx BasicBlockData<'tcx>>,
+    arg_data: Vec<&'tcx LocalDecl<'tcx>>,
+    var_data: Vec<&'tcx LocalDecl<'tcx>>,
+    func_return_type: Ty<'tcx>,
+}
 
 impl <'tcx> Pass for StanleyMir {}
 
@@ -42,12 +48,31 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         }
 
         println!("{:?}\t{:?}\t{}\t{}", mir.return_ty, name, pre_string, post_string);
-        //println!("{:#?}", mir);
 
         let pre_string_expression = parse_condition(pre_string);
-        println!("{:?}", pre_string_expression);
         let post_string_expression = parse_condition(post_string);
+        
+        println!("{:?}", pre_string_expression);
         println!("{:?}", post_string_expression);
+
+        let mut data = MirData {
+            block_data: Vec::new(),
+            arg_data: Vec::new(),
+            var_data: Vec::new(),
+            func_return_type: mir.return_ty
+        };
+
+        for block in mir.basic_blocks() {
+            data.block_data.push(block);
+        }
+
+        for arg_data in mir.args_iter() {
+            data.arg_data.push(&mir.local_decls[arg_data]);
+        }
+
+        for var_data in mir.vars_iter() {
+            data.var_data.push(&mir.local_decls[var_data]);
+        }
     }
 }
 
@@ -66,11 +91,7 @@ fn parse_attributes(attrs: &[Spanned<Attribute_>]) -> (String, String) {
     let mut post_string = "".to_string();
 
     for attr in attrs {
-        if let MetaItemKind::List(ref attr_name, ref items) = attr.node.value.node {
-            if attr_name != "condition" {
-                continue;
-            }
-
+        if let MetaItemKind::List(_, ref items) = attr.node.value.node {
             for item in items {
                 if let NestedMetaItemKind::MetaItem(ref i_string) = item.node {
                     if let MetaItemKind::NameValue(ref attr_param_name, ref literal) = i_string.node {
