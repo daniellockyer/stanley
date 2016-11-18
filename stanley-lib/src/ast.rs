@@ -1,5 +1,6 @@
 use std::fmt::{Debug, Formatter, Error};
 
+#[derive(Clone, PartialEq)]
 pub enum Expression {
     BinaryExpression(Box<Expression>, BinaryOperator, Box<Expression>),
     UnaryExpression(UnaryOperator, Box<Expression>),
@@ -56,6 +57,12 @@ pub enum Types {
     U32,
     U64,
     Unknown
+}
+
+impl PartialEq for BinaryOperator {
+    fn eq(&self, _rhs: &BinaryOperator) -> bool {
+        return self == _rhs;
+    }
 }
 
 impl Debug for Expression {
