@@ -2,37 +2,192 @@ use std::str::FromStr;
 use ast::*;
 grammar;
 
-pub Condition: Box<Expression> = {
-    Condition ExprOp Factor => Box::new(Expression::BinaryExpression(<>)),
-    Factor,
+ExprHelper<T1, OP, T2>: Expression = {
+    <left: T1> <op: OP> <right: T2> => Expression::BinaryExpression(Box::new(left), op, Box::new(right)),
+    T2,
 };
 
-Factor: Box<Expression> = {
-    Factor FactorOp Term => Box::new(Expression::BinaryExpression(<>)),
-    Term,
+pub Condition = ExprHelper<Condition, BOP1, E2>;
+E2            = ExprHelper<E2, BOP2, E3>;
+E3            = ExprHelper<E3, BOP3, E4>;
+E4            = ExprHelper<E4, BOP4, E5>;
+E5            = ExprHelper<E5, BOP5, E6>;
+E6            = ExprHelper<E6, BOP6, E7>;
+E7            = ExprHelper<E7, BOP7, E8>;
+E8            = ExprHelper<E8, BOP8, E9>;
+
+E9: Expression = {
+    <op: UOP> <e: E9> => Expression::UnaryExpression(op, Box::new(e)),
+    E10,
 };
 
-Term: Box<Expression> = {
-    BOOL => Box::new(Expression::BooleanLiteral(<>)),
-    NUM => Box::new(Expression::Number(<>)),
-    "(" <Condition> ")"
+E10: Expression = {
+    "true" => Expression::BooleanLiteral(true),
+    "false" => Expression::BooleanLiteral(false),
+    <n:r"-?[0-9]+"> ":" <t: TYPE> => Expression::BitVector(i64::from_str(n).unwrap(), t),
+    <n: IDENTIFIER> ":" <t: TYPE> => Expression::VariableMapping(n, t),
+    "(" <Condition> ")",
 };
 
-/////////////////////////////////////////////////////////////////////////////////////
+UOP: UnaryOperator = {
+    "-" => UnaryOperator::Negation,
+    "!" => UnaryOperator::BitwiseNot,
+    "NOT" => UnaryOperator::Not,
+};
 
-ExprOp: BinaryOperator = {
+BOP1: BinaryOperator = {
+    "&&" => BinaryOperator::And,
+    "AND" => BinaryOperator::And,
+    "||" => BinaryOperator::Or,
+    "OR" => BinaryOperator::Or,
+    "XOR" => BinaryOperator::Xor,
+    "=>" => BinaryOperator::Implication,
+    "IMPLIES" => BinaryOperator::Implication,
+    "<=>" => BinaryOperator::BiImplication,
+    "EQUIV" => BinaryOperator::BiImplication,
+};
+
+BOP2: BinaryOperator = {
+    "<" => BinaryOperator::LessThan,
+    "<=" => BinaryOperator::LessThanOrEqual,
+    ">" => BinaryOperator::GreaterThan,
+    ">=" => BinaryOperator::GreaterThanOrEqual,
+    "==" => BinaryOperator::Equal,
+    "!=" => BinaryOperator::NotEqual,
+};
+
+BOP3: BinaryOperator = {
+    "|" => BinaryOperator::BitwiseOr,
+};
+
+BOP4: BinaryOperator = {
+    "^" => BinaryOperator::BitwiseXor,
+};
+
+BOP5: BinaryOperator = {
+    "&" => BinaryOperator::BitwiseAnd,
+};
+
+BOP6: BinaryOperator = {
+    "<<" => BinaryOperator::BitwiseLeftShift,
+    ">>" => BinaryOperator::BitwiseRightShift,
+};
+
+BOP7: BinaryOperator = {
     "+" => BinaryOperator::Addition,
     "-" => BinaryOperator::Subtraction,
 };
 
-FactorOp: BinaryOperator = {
+BOP8: BinaryOperator = {
     "*" => BinaryOperator::Multiplication,
     "/" => BinaryOperator::Division,
     "%" => BinaryOperator::Modulo,
 };
 
-IDENTIFIER: String = r"[a-zA-Z]+[0-9]*" => <>.to_string();
+IDENTIFIER: String = {
+    r"_[a-zA-Z0-9_]+" => <>.to_string(),
+    r"[a-zA-Z][a-zA-Z0-9_]*" => {
+        match <> {
+            "as" | "box" | "break" | "const" | "continue" | "crate" | "else" | "enum" | "extern" |
+            "false" | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "match" | "mod" |
+            "move" | "mut" | "pub" | "ref" | "self" | "Self" | "static" | "struct" |
+            "super" | "trait" | "true" | "type" | "unsafe" | "use" | "where" | "while" |
+            "abstract" | "alignof" | "become" | "do" | "final" | "macro" | "offsetof" |
+            "override" | "priv" | "proc" | "pure" | "sizeof" | "typeof" | "unsized" | "virtual" |
+            "yield" => {
+                panic!("Use of reserved keyword as identifier: {}", <>.to_string());
+            },
+            _ => <>.to_string(),
+        }
+    },
+};
 
-BOOL: bool = r"true|false" => bool::from_str(<>).unwrap();
+TYPE: Types = {
+    "bool" => Types::Bool,
+    "i8" => Types::I8,
+    "i16" => Types::I16,
+    "i32" => Types::I32,
+    "i64" => Types::I64,
+    "u8" => Types::U8,
+    "u16" => Types::U16,
+    "u32" => Types::U32,
+    "u64" => Types::U64,
+};
 
-NUM: i32 = r"[0-9]+" => i32::from_str(<>).unwrap();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//pub Condition: Box<Expression> = {
+    //Condition ExprOp Factor => Box::new(Expression::BinaryExpression(<>)),
+    //Factor,
+//};
+
+//Factor: Box<Expression> = {
+  //  Factor FactorOp Term => Box::new(Expression::BinaryExpression(<>)),
+    //Term,
+//};
+
+//Term: Box<Expression> = {
+    //BOOL => Box::new(Expression::BooleanLiteral(<>)),
+    //NUM => Box::new(Expression::Number(<>)),
+    //"(" <Condition> ")"
+//};
+
+//ExprOp: BinaryOperator = {
+    //"+" => BinaryOperator::Addition,
+    //"-" => BinaryOperator::Subtraction,
+//};
+
+//FactorOp: BinaryOperator = {
+    //"*" => BinaryOperator::Multiplication,
+    //"/" => BinaryOperator::Division,
+    //"%" => BinaryOperator::Modulo,
+//};
+
+//BOOL: bool = {
+    //"true" => true,
+    //"false" => false
+//};
+
+//IDENTIFIER: String = r"[a-zA-Z]+[0-9]*" => <>.to_string();
+
+//NUM: i32 = r"[0-9]+" => i32::from_str(<>).unwrap();

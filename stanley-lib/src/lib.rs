@@ -50,7 +50,7 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
     }
 }
 
-fn parse_condition(condition: String) -> Box<Expression> {
+fn parse_condition(condition: String) -> Expression {
     match condition_parser::parse_Condition(&*condition) {
         Ok(e) => e,
         Err(e) => panic!("Error parsing condition \"{}\": \"{:?}\"", condition, e)
