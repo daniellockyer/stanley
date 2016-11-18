@@ -42,6 +42,7 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         }
 
         println!("{:?}\t{:?}\t{}\t{}", mir.return_ty, name, pre_string, post_string);
+        //println!("{:#?}", mir);
 
         let pre_string_expression = parse_condition(pre_string);
         println!("{:?}", pre_string_expression);
