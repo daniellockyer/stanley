@@ -54,7 +54,8 @@ pub enum Types {
     U8,
     U16,
     U32,
-    U64
+    U64,
+    Unknown
 }
 
 impl Debug for Expression {
@@ -118,7 +119,8 @@ impl Debug for Types {
             Types::U8 => { write!(fmt, "u8") },
             Types::U16 => { write!(fmt, "u16") },
             Types::U32 => { write!(fmt, "u32") },
-            Types::U64 => { write!(fmt, "u64") }
+            Types::U64 => { write!(fmt, "u64") },
+            Types::Unknown => { write!(fmt, "?") }
         }
     }
 }

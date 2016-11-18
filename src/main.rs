@@ -6,7 +6,7 @@
 fn main() {
 }
 
-#[condition(pre="true", post="return:i32 == (x:i32 + 5:i32)")]
+#[condition(pre="true", post="ret == (x - 5:i32)")]
 fn param_minus_five(x: i32) -> i32 {
     x - 5
 }
@@ -26,9 +26,9 @@ fn selection(xs: &mut [u32]) {
         xs.swap(i, cur_min);
         i = i + 1;
     }
-}
+}*/
 
-#[condition(pre="true", post="ret (x < 10:i32)")]
+#[condition(pre="true", post="ret == (x < 10:i32)")]
 fn check_less_than_ten(x: i32) -> bool {
     if x <= 10 { //buggy
         true
@@ -37,17 +37,11 @@ fn check_less_than_ten(x: i32) -> bool {
     }
 }
 
-#[condition(pre="true", post="ret (x < 5:i32)")]
+#[condition(pre="true", post="ret == (x < 5:i32)")]
 fn check_less_than_five(x:i32) -> bool {
     x < 5
 }
-
-#[condition(pre="x <= i32::MAX - 5:i32", post="ret (x + 5:i32)")]
-fn add_five(x:i32) -> i32 {
-    assert!(x <= std::i32::MAX - 5);
-    x + 5
-}
-
+/*
 #[condition(pre="true", post="ret !x")]
 fn boolean_not(x:bool) -> bool {
     if x == true {
@@ -55,5 +49,11 @@ fn boolean_not(x:bool) -> bool {
     } else {
         true
     }
+}
+
+#[condition(pre="x <= i32::MAX - 5:i32", post="ret == (x + 5:i32)")]
+fn add_five(x:i32) -> i32 {
+    assert!(x <= std::i32::MAX - 5);
+    x + 5
 }
 */

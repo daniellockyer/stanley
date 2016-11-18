@@ -25,7 +25,9 @@ E10: Expression = {
     "true" => Expression::BooleanLiteral(true),
     "false" => Expression::BooleanLiteral(false),
     <n:r"-?[0-9]+"> ":" <t: TYPE> => Expression::BitVector(i64::from_str(n).unwrap(), t),
-    <n: IDENTIFIER> ":" <t: TYPE> => Expression::VariableMapping(n, t),
+    r"-?[0-9]+" => Expression::BitVector(i64::from_str(<>).unwrap(), Types::Unknown),
+    <IDENTIFIER> ":" <TYPE> => Expression::VariableMapping(<>),
+    <IDENTIFIER> => Expression::VariableMapping(<>, Types::Unknown),
     "(" <Condition> ")",
 };
 
@@ -112,4 +114,5 @@ TYPE: Types = {
     "u16" => Types::U16,
     "u32" => Types::U32,
     "u64" => Types::U64,
+    "" => Types::Unknown
 };
