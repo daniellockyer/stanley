@@ -22,7 +22,7 @@ use rustc::ty::{TyCtxt, Ty};
 use syntax::feature_gate::AttributeType;
 use syntax::codemap::Spanned;
 use syntax::ast::{MetaItemKind, NestedMetaItemKind, Attribute_};
-use ast::Expression;
+use ast::{Expression, Types};
 
 struct StanleyMir;
 
@@ -90,16 +90,33 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
     }
 }
 
+fn get_argument_type(name: String, data: &MirData) -> Types {
+    for arg in data.arg_data.iter() {
+        let a = arg.name.unwrap().as_str();
+        let arg_name = String::from_utf8_lossy(a.as_bytes());
+
+        if name == arg_name {
+            return ast::type_to_enum(arg.ty)
+        }
+    }
+    Types::Unknown
+}
+
 fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
     match expression {
         Expression::VariableMapping(a, b) => {
+            let aa = a.clone();
             let mut bb = b.clone();
 
-            if a == "ret" {
-                bb = ast::type_to_enum(data.func_return_type);
+            if bb == Types::Unknown {
+                if aa == "ret" {
+                    bb = ast::type_to_enum(data.func_return_type);
+                } else {
+                    bb = get_argument_type(a, data);
+                }
             }
 
-            Expression::VariableMapping(a.clone(), bb)
+            Expression::VariableMapping(aa, bb)
         },
         Expression::BinaryExpression(a, b, c) => {
             let aa = walk_and_replace(*a.clone(), data);
