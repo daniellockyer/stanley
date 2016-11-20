@@ -44,6 +44,11 @@ fn boolean_not2(x:bool) -> bool {
 }
 
 /*
+#[condition(pre="(x <= i32::MAX - 5:i32)", post="return == (x + 5:i32)")]
+fn add_five(x:i32) -> i32 {
+    assert!(x <= 2147483647-5);
+    x+5
+}
 
 #[condition(pre="true", post="ret sorted(xs)")]
 fn selection(xs: &mut [u32]) {
@@ -59,11 +64,5 @@ fn selection(xs: &mut [u32]) {
         xs.swap(i, cur_min);
         i = i + 1;
     }
-}
-
-#[condition(pre="x <= i32::MAX - 5:i32", post="ret == (x + 5:i32)")]
-fn add_five(x:i32) -> i32 {
-    assert!(x <= std::i32::MAX - 5);
-    x + 5
 }
 */
