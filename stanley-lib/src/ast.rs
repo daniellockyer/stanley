@@ -49,7 +49,7 @@ pub enum UnaryOperator {
     Not,
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Copy)]
 pub enum Types {
     Bool,
     I8,
@@ -60,6 +60,7 @@ pub enum Types {
     U16,
     U32,
     U64,
+    Void,
     Unknown
 }
 
@@ -156,7 +157,207 @@ impl Debug for Types {
             Types::U16 => { write!(fmt, "u16") },
             Types::U32 => { write!(fmt, "u32") },
             Types::U64 => { write!(fmt, "u64") },
+            Types::Void => { write!(fmt, "()") },
             Types::Unknown => { write!(fmt, "?") }
         }
+    }
+}
+
+pub fn determine_evaluation_type(expression: Expression) -> Types {
+    match ty_check(expression.clone()) {
+        Ok(_) => {
+            match expression {
+                Expression::BinaryExpression(ref l, ref op, ref r) => {
+                    match *op {
+                        BinaryOperator::Addition
+                        | BinaryOperator::Subtraction
+                        | BinaryOperator::Multiplication
+                        | BinaryOperator::Division
+                        | BinaryOperator::Modulo
+                        | BinaryOperator::BitwiseLeftShift
+                        | BinaryOperator::BitwiseRightShift
+                        | BinaryOperator::BitwiseOr
+                        | BinaryOperator::BitwiseAnd
+                        | BinaryOperator::BitwiseXor => determine_evaluation_type(*l.clone()),
+                        BinaryOperator::LessThan
+                        | BinaryOperator::LessThanOrEqual
+                        | BinaryOperator::GreaterThan
+                        | BinaryOperator::GreaterThanOrEqual
+                        | BinaryOperator::Equal
+                        | BinaryOperator::NotEqual
+                        | BinaryOperator::And
+                        | BinaryOperator::Or
+                        | BinaryOperator::Xor
+                        | BinaryOperator::Implication
+                        | BinaryOperator::BiImplication => Types::Bool,
+                    }
+                },
+                Expression::UnaryExpression(ref op, ref expr) => {
+                    let expra = expr.clone();
+                    match *op {
+                        UnaryOperator::Negation | UnaryOperator::Not => determine_evaluation_type(*expra),
+                        UnaryOperator::BitwiseNot => determine_evaluation_type(*expra),
+                    }
+                },
+                Expression::VariableMapping(ref name, ref ty) => ty.clone(),
+                Expression::BooleanLiteral(_) => Types::Bool,
+                Expression::BitVector(ref val, ref ty) => {
+                    match *ty {
+                        Types::U8 => Types::U8,
+                        Types::U16 => Types::U16,
+                        Types::U32 => Types::U32,
+                        Types::U64 => Types::U64,
+                        Types::I8 => Types::I8,
+                        Types::I16 => Types::I16,
+                        Types::I32 => Types::I32,
+                        Types::I64 => Types::I64,
+                        _ => panic!("Invalid or Unsupported integer type: \"{:?}\"", ty)
+                    }
+                },
+            }
+        },
+        Err(e) => panic!("{}", e),
+    }
+}
+
+pub fn same_signedness(type1: Types, type2: Types) -> bool {
+    match type1 {
+        Types::U8 | Types::U16 | Types::U32 | Types::U64 => {
+            match type2 {
+                Types::U8 | Types::U16 | Types::U32 | Types::U64 => true,
+                Types::I8 | Types::I16 | Types::I32 | Types::I64 => false,
+                _ => unreachable!()
+            }
+        },
+        Types::I8 | Types::I16 | Types::I32 | Types::I64 => {
+            match type2 {
+                Types::U8 | Types::U16 | Types::U32 | Types::U64 => false,
+                Types::I8 | Types::I16 | Types::I32 | Types::I64 => true,
+                _ => unreachable!()
+            }
+        },
+        _ => panic!("Cannot find numeric signedness of `{:?}`", type1)
+    }
+}
+
+pub fn ty_check(expression: Expression) -> Result<bool, String> {
+    match expression {
+        Expression::BooleanLiteral(_) => Ok(true),
+        Expression::VariableMapping(ref name, ref ty) => {
+            match *ty {
+                Types::Void => Err(format!("Variable `{}` has void type!", name)),
+                _ => Ok(true)
+            }
+        },
+        Expression::UnaryExpression(ref op, ref expr) => {
+            match *op {
+                UnaryOperator::Negation => {
+                    match ty_check(*expr.clone()) {
+                        Ok(_) => {
+                            match determine_evaluation_type(*expr.clone()) {
+                                Types::Bool => Err(format!("Invalid use of operator {:?} on boolean value {:?}", *op, *expr)),
+                                _ => Ok(true)
+                            }
+                        },
+                        Err(e) => Err(e)
+                    }
+                },
+                UnaryOperator::BitwiseNot => {
+                    match ty_check(*expr.clone()) {
+                        Ok(_) => Ok(true),
+                        Err(e) => Err(e)
+                    }
+                },
+                UnaryOperator::Not => {
+                    match determine_evaluation_type(*expr.clone()) {
+                        Types::Bool => Ok(true),
+                        _ => Err(format!("Invalid use of operator {:?} on non-boolean value {:?}", *op, *expr))
+                    }
+                }
+            }
+        },
+        Expression::BitVector(ref val, ref ty) => {
+            match *ty {
+                Types::U8 => Ok(true),
+                Types::U16 => Ok(true),
+                Types::U32 => Ok(true),
+                Types::U64 => Ok(true),
+                Types::I8 => Ok(true),
+                Types::I16 => Ok(true),
+                Types::I32 => Ok(true),
+                Types::I64 => Ok(true),
+                _ => Err(format!("Invalid or unsupported integer type: \"{:?}\"", ty))
+            }
+        }
+        Expression::BinaryExpression(ref l, ref op, ref r) => {
+            let la = *l.clone();
+            let ra = *r.clone();
+
+            match ty_check(*l.clone()) {
+                Ok(_) => {
+                    match ty_check(*r.clone()) {
+                        Ok(_) => {
+                            let l_type: Types = determine_evaluation_type(la);
+                            let r_type: Types = determine_evaluation_type(ra);
+
+                            match *op {
+                                BinaryOperator::Addition | BinaryOperator::Subtraction | BinaryOperator::Multiplication | BinaryOperator::Division | BinaryOperator::Modulo => {
+                                    if (l_type == Types::Bool) || (r_type == Types::Bool) {
+                                        Err(format!("Invalid use of binary operator {:?} on boolean value(s)", op))
+                                    } else if l_type != r_type {
+                                        Err(format!("Binary operand types do not match: {:?} {:?} {:?}", l_type, op, r_type))
+                                    } else {
+                                        Ok(true)
+                                    }
+                                },
+                                BinaryOperator::BitwiseLeftShift | BinaryOperator::BitwiseRightShift => {
+                                    if (l_type == Types::Bool) || (r_type == Types::Bool) {
+                                        Err(format!("Invalid use of binary operator {:?} on boolean value(s)", op))
+                                    } else if !same_signedness(l_type, r_type) {
+                                        Err(format!("Binary operand types do not match: {:?} {:?} {:?}", l_type, op, r_type))
+                                    } else {
+                                        Ok(true)
+                                    }
+                                },
+                                BinaryOperator::BitwiseOr | BinaryOperator::BitwiseAnd | BinaryOperator::BitwiseXor => {
+                                    if l_type != r_type {
+                                        Err(format!("Binary operand types do not match: {:?} {:?} {:?}", l_type, op, r_type))
+                                    } else {
+                                        Ok(true)
+                                    }
+                                },
+                                BinaryOperator::LessThan | BinaryOperator::LessThanOrEqual | BinaryOperator::GreaterThan | BinaryOperator::GreaterThanOrEqual => {
+                                    if (l_type == Types::Bool) || (r_type == Types::Bool) {
+                                        Err(format!("Invalid use of binary operator {:?} on boolean value(s)", op))
+                                    } else if l_type != r_type {
+                                        Err(format!("Binary operand types do not match: {:?} {:?} {:?}", l_type, op, r_type))
+                                    } else {
+                                        Ok(true)
+                                    }
+                                },
+                                BinaryOperator::Equal | BinaryOperator::NotEqual => {
+                                    if l_type != r_type {
+                                        Err(format!("Binary operand types do not match: {:?} {:?} {:?}", l_type, op, r_type))
+                                    } else {
+                                        Ok(true)
+                                    }
+                                },
+                                BinaryOperator::And | BinaryOperator::Or | BinaryOperator::Xor | BinaryOperator::Implication | BinaryOperator::BiImplication => {
+                                    if (l_type != Types::Bool) || (r_type != Types::Bool) {
+                                        Err(format!("Invalid use of binary operator {:?} on boolean value(s)", op))
+                                    } else if l_type != r_type {
+                                        Err(format!("Binary operand types do not match: {:?} {:?} {:?}", l_type, op, r_type))
+                                    } else {
+                                        Ok(true)
+                                    }
+                                }
+                            }
+                        },
+                        Err(e) => Err(e)
+                    }
+                },
+                Err(e) => Err(e)
+            }
+        }   
     }
 }

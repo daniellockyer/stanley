@@ -83,6 +83,8 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
 
         post_string_expression = walk_and_replace(post_string_expression, &data);
 
+        ast::ty_check(post_string_expression.clone()).unwrap();
+
         println!("{:?}", pre_string_expression);
         println!("{:?}", post_string_expression);
 
@@ -136,10 +138,7 @@ fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
 fn parse_condition(condition: String) -> Expression {
     match condition_parser::parse_Condition(&*condition) {
         Ok(e) => e,
-        Err(e) => {
-            println!("{:?}", e);
-            panic!("Error parsing condition \"{}\"", condition)
-        }
+        Err(e) => panic!("Error parsing condition \"{}\" with error \"{:?}\"", condition, e)
     }
 }
 
