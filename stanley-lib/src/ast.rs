@@ -126,11 +126,11 @@ impl Debug for BinaryOperator {
             BinaryOperator::GreaterThanOrEqual => write!(fmt, ">="),
             BinaryOperator::Equal => write!(fmt, "=="),
             BinaryOperator::NotEqual => write!(fmt, "!="),
-            BinaryOperator::And => write!(fmt, "AND"),
-            BinaryOperator::Or => write!(fmt, "OR"),
+            BinaryOperator::And => write!(fmt, "&&"),
+            BinaryOperator::Or => write!(fmt, "||"),
             BinaryOperator::Xor => write!(fmt, "XOR"),
-            BinaryOperator::Implication => write!(fmt, "IMPLIES"),
-            BinaryOperator::BiImplication => write!(fmt, "EQUIV"),
+            BinaryOperator::Implication => write!(fmt, "=>"),
+            BinaryOperator::BiImplication => write!(fmt, "=="),
         }
     }
 }

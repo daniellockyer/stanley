@@ -27,7 +27,7 @@ E10: Expression = {
     <n:r"-?[0-9]+"> ":" <t: TYPE> => Expression::BitVector(i64::from_str(n).unwrap(), t),
     r"-?[0-9]+" => Expression::BitVector(i64::from_str(<>).unwrap(), Types::Unknown),
     <IDENTIFIER> ":" <TYPE> => Expression::VariableMapping(<>),
-    <IDENTIFIER> => Expression::VariableMapping(<>, Types::Unknown),
+    <IDENTIFIER>            => Expression::VariableMapping(<>, Types::Unknown),
     "(" <Condition> ")",
 };
 
@@ -39,14 +39,10 @@ UOP: UnaryOperator = {
 
 BOP1: BinaryOperator = {
     "&&" => BinaryOperator::And,
-    "AND" => BinaryOperator::And,
     "||" => BinaryOperator::Or,
-    "OR" => BinaryOperator::Or,
     "XOR" => BinaryOperator::Xor,
     "=>" => BinaryOperator::Implication,
-    "IMPLIES" => BinaryOperator::Implication,
     "<=>" => BinaryOperator::BiImplication,
-    "EQUIV" => BinaryOperator::BiImplication,
 };
 
 BOP2: BinaryOperator = {
@@ -87,21 +83,7 @@ BOP8: BinaryOperator = {
 };
 
 IDENTIFIER: String = {
-    r"_[a-zA-Z0-9_]+" => <>.to_string(),
-    r"[a-zA-Z][a-zA-Z0-9_]*" => {
-        match <> {
-            "as" | "box" | "break" | "const" | "continue" | "crate" | "else" | "enum" | "extern" |
-            "false" | "fn" | "for" | "if" | "impl" | "in" | "let" | "loop" | "match" | "mod" |
-            "move" | "mut" | "pub" | "ref" | "self" | "Self" | "static" | "struct" |
-            "super" | "trait" | "true" | "type" | "unsafe" | "use" | "where" | "while" |
-            "abstract" | "alignof" | "become" | "do" | "final" | "macro" | "offsetof" |
-            "override" | "priv" | "proc" | "pure" | "sizeof" | "typeof" | "unsized" | "virtual" |
-            "yield" => {
-                panic!("Use of reserved keyword as identifier: {}", <>.to_string());
-            },
-            _ => <>.to_string(),
-        }
-    },
+    r"[a-zA-Z][a-zA-Z0-9_]*" => <>.to_string(),
 };
 
 TYPE: Types = {

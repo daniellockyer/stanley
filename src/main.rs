@@ -34,7 +34,7 @@ fn boolean_not(x:bool) -> bool {
     }
 }
 
-#[condition(pre="true", post="(x == true IMPLIES ret == false) && (x == false IMPLIES ret == true)")]
+#[condition(pre="true", post="(x == true => ret == false) && (x == false => ret == true)")]
 fn boolean_not2(x:bool) -> bool {
     if x == true {
         false
