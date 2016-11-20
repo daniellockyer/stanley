@@ -86,23 +86,6 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         println!("{:?}", pre_string_expression);
         println!("{:?}", post_string_expression);
 
-        /*
-        let weakest_precondition = gen(0, &mut data, &post_string_expression);
-
-        println!("{:?}", weakest_precondition);
-
-        let verification_condition: Expression = Expression::BinaryExpression(
-            Box::new(pre_string_expression),
-            BinaryOperator::Implication,
-            Box::new(weakest_precondition));
-
-        match expression::ty_check(&verification_condition) {
-            Ok(_) => {},
-            Err(e) => panic!("{}", e),
-        }
-
-        gen_smtlib(&verification_condition, name, debug);*/
-
         println!("\n\n\n\n");
     }
 }
