@@ -34,6 +34,15 @@ fn boolean_not(x:bool) -> bool {
     }
 }
 
+#[condition(pre="true", post="(x == true IMPLIES ret == false) && (x == false IMPLIES ret == true)")]
+fn boolean_not2(x:bool) -> bool {
+    if x == true {
+        false
+    } else {
+        true
+    }
+}
+
 /*
 
 #[condition(pre="true", post="ret sorted(xs)")]
