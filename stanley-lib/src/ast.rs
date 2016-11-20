@@ -1,4 +1,8 @@
 use std::fmt::{Debug, Formatter, Error};
+use rustc::ty::Ty;
+use rustc::ty::TypeVariants::*;
+use syntax::ast::IntTy::*;
+use syntax::ast::UintTy::*;
 
 #[derive(Clone, PartialEq)]
 pub enum Expression {
@@ -57,6 +61,31 @@ pub enum Types {
     U32,
     U64,
     Unknown
+}
+
+pub fn type_to_enum(x: Ty) -> Types {
+    match x.sty {
+        TyBool => Types::Bool,
+        TyInt(a) => {
+            match a {
+                I8 => Types::I8,
+                I16 => Types::I16,
+                I32 => Types::I32,
+                I64 => Types::I64,
+                _ => unreachable!() //TODO: Is
+            }
+        },
+        TyUint(a) => {
+            match a {
+                U8 => Types::U8,
+                U16 => Types::U16,
+                U32 => Types::U32,
+                U64 => Types::U64,
+                _ => unreachable!() //TODO: Us
+            }
+        }
+        _ => Types::Unknown
+    }
 }
 
 impl PartialEq for BinaryOperator {

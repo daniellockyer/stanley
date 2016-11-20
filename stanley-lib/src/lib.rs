@@ -22,9 +22,7 @@ use rustc::ty::{TyCtxt, Ty};
 use syntax::feature_gate::AttributeType;
 use syntax::codemap::Spanned;
 use syntax::ast::{MetaItemKind, NestedMetaItemKind, Attribute_};
-use rustc_data_structures::indexed_vec::Idx;
-use rustc::middle::const_val::ConstVal;
-use ast::{Expression, BinaryOperator, UnaryOperator};
+use ast::Expression;
 
 struct StanleyMir;
 
@@ -54,10 +52,10 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         println!("{:?}\t{:?}\t{}\t{}", mir.return_ty, name, pre_string, post_string);
 
         let pre_string_expression = parse_condition(pre_string);
-        let post_string_expression = parse_condition(post_string);
+        let mut post_string_expression = parse_condition(post_string);
         
-        /*println!("{:?}", pre_string_expression);
-        println!("{:?}", post_string_expression);*/
+        println!("{:?}", pre_string_expression);
+        println!("{:?}", post_string_expression);
 
         let mut data = MirData {
             block_data: Vec::new(),
@@ -83,6 +81,12 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             data.temp_data.push(&mir.local_decls[temp_data]);
         }
 
+        post_string_expression = walk_and_replace(post_string_expression, &data);
+
+        println!("{:?}", pre_string_expression);
+        println!("{:?}", post_string_expression);
+
+        /*
         let weakest_precondition = gen(0, &mut data, &post_string_expression);
 
         println!("{:?}", weakest_precondition);
@@ -92,206 +96,41 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             BinaryOperator::Implication,
             Box::new(weakest_precondition));
 
-        /*match expression::ty_check(&verification_condition) {
+        match expression::ty_check(&verification_condition) {
             Ok(_) => {},
             Err(e) => panic!("{}", e),
-        }*/
+        }
 
-        //gen_smtlib(&verification_condition, name, debug);
+        gen_smtlib(&verification_condition, name, debug);*/
 
         println!("\n\n\n\n");
     }
 }
 
-fn gen(index: usize, data: &mut MirData, post_expr: &Expression) -> Expression {
-    let mut wp: Expression = Expression::BooleanLiteral(true);
-    let terminator = data.block_data[index].terminator.clone().unwrap().kind;
+fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
+    match expression {
+        Expression::VariableMapping(a, b) => {
+            let mut bb = b.clone();
 
-    match terminator {
-        TerminatorKind::Assert{target, ..} |
-        TerminatorKind::Goto{target} => {
-            wp = gen(target.index(), data, post_expr)
-        },
-        TerminatorKind::Return => {
-            return (*post_expr).clone();
-        },
-        TerminatorKind::Call{func, ..} => {
-            match func {
-                Operand::Constant (ref c) => {
-                    let s = format!("{:?}", c.literal);
-                    if s.contains("begin_panic") {
-                        return Expression::BooleanLiteral(false);
-                    }
-                },
-                Operand::Consume (..) => unimplemented!(),
-            };
-            unreachable!();
-        },
-        TerminatorKind::If{cond, targets} => {
-            let wp_if = gen(targets.0.index(), data, post_expr);
-            let wp_else = gen(targets.1.index(), data, post_expr);
-
-            let condition = match cond {
-                Operand::Constant (ref constant) => {
-                    match constant.literal {
-                        Literal::Value {ref value} => {
-                            match *value {
-                                ConstVal::Bool (ref boolean) => {
-                                    Expression::BooleanLiteral(*boolean)
-                                },
-                                _ => unreachable!(),
-                            }
-                        },
-                        _ => unimplemented!(),
-                    }
-                },
-                _ => { Expression::BooleanLiteral(false) } //TODO: Fix this
-                //Operand::Consume(c) => { gen_lvalue(c, data) },
-            };
-            // Negate the conditional expression
-            let not_condition = Expression::UnaryExpression(UnaryOperator::Not, Box::new(condition.clone()));
-
-            // wp(If c x else y) => (c -> x) AND ((NOT c) -> y)
-            wp = Expression::BinaryExpression(
-                Box::new(Expression::BinaryExpression(
-                    Box::new(condition.clone()),
-                    BinaryOperator::Implication,
-                    Box::new(wp_if)
-                )),
-                BinaryOperator::And,
-                Box::new(Expression::BinaryExpression(
-                    Box::new(not_condition.clone()),
-                    BinaryOperator::Implication,
-                    Box::new(wp_else)
-                ))
-            );
-        },
-        TerminatorKind::DropAndReplace{..} => unimplemented!(),
-        TerminatorKind::Drop{..} => unimplemented!(),
-        TerminatorKind::Unreachable => unimplemented!(),
-        TerminatorKind::Resume => unimplemented!(),
-        TerminatorKind::Switch{..} => unimplemented!(),
-        TerminatorKind::SwitchInt{..} => unimplemented!()
-    }
-
-    let mut stmts = data.block_data[index].statements.clone();
-    stmts.reverse();
-
-    for stmt in stmts {
-        wp = gen_stmt(wp, stmt, data);
-    }
-
-    wp
-}
-
-fn gen_stmt(mut wp: Expression, stmt: Statement, data: &mut MirData) -> Expression {
-    if debug {
-        println!("processing statement\t{:?}\ninto expression\t\t{:?}", stmt, wp);
-    }
-
-    let lvalue: Option<Lvalue>;
-    let rvalue: Option<Rvalue>;
-
-    // Store the values of the statement
-    match stmt.kind {
-        StatementKind::Assign(ref lval, ref rval) => {
-            lvalue = Some(lval.clone());
-            rvalue = Some(rval.clone());
-        },
-        //_ => return Some(wp)
-    }
-    // The variable or temp on the left-hand side of the assignment
-    let mut var = gen_lvalue(lvalue.unwrap(), data);
-
-    // The expression on the right-hand side of the assignment
-    let mut expression = Vec::new();
-    match rvalue.clone().unwrap() {
-        Rvalue::CheckedBinaryOp(ref binop, ref loperand, ref roperand) => {
-            let lvalue: Expression = gen_expression(loperand, data);
-            let rvalue: Expression = gen_expression(roperand, data);
-            let op: BinaryOperator = match *binop {
-                BinOp::Add => BinaryOperator::Addition,
-                BinOp::Sub => BinaryOperator::Subtraction,
-                BinOp::Mul => BinaryOperator::Multiplication,
-                BinOp::Div => BinaryOperator::Division,
-                BinOp::Rem => BinaryOperator::Modulo,
-                BinOp::Shl => BinaryOperator::BitwiseLeftShift,
-                BinOp::Shr => BinaryOperator::BitwiseRightShift,
-                _ => panic!("Unsupported checked binary operation!"),
-            };
-
-            var.name = var.name + ".0";
-
-            // Add the new BinaryExpressionData to the expression vector
-            expression.push(Expression::BinaryExpression(Box::new(lvalue), op, Box::new(rvalue)));
-        },
-
-        Rvalue::BinaryOp(ref binop, ref lval, ref rval) => {
-            let lvalue: Expression = gen_expression(lval, data);
-            let rvalue: Expression = gen_expression(rval, data);
-            let op: BinaryOperator = match *binop {
-                BinOp::Add => BinaryOperator::Addition,
-                BinOp::Sub => BinaryOperator::Subtraction,
-                BinOp::Mul => BinaryOperator::Multiplication,
-                BinOp::Div => BinaryOperator::Division,
-                BinOp::Rem => BinaryOperator::Modulo,
-                BinOp::BitOr => BinaryOperator::BitwiseOr,
-                BinOp::BitAnd => BinaryOperator::BitwiseAnd,
-                BinOp::BitXor => BinaryOperator::BitwiseXor,
-                BinOp::Shl => BinaryOperator::BitwiseLeftShift,
-                BinOp::Shr => BinaryOperator::BitwiseRightShift,
-                BinOp::Lt => BinaryOperator::LessThan,
-                BinOp::Le => BinaryOperator::LessThanOrEqual,
-                BinOp::Gt => BinaryOperator::GreaterThan,
-                BinOp::Ge => BinaryOperator::GreaterThanOrEqual,
-                BinOp::Eq => BinaryOperator::Equal,
-                BinOp::Ne => BinaryOperator::NotEqual,
-            };
-            // Add the expression to the vector
-            expression.push(Expression::BinaryExpression(Box::new(lvalue), op, Box::new(rvalue)));
-        },
-        // Generates Rvalue to a UnaryOp
-        Rvalue::UnaryOp(ref unop, ref val) => {
-            let exp: Expression = gen_expression(val, data);
-            let op: UnaryOperator = match *unop {
-                UnOp::Not => {
-                    if determine_evaluation_type(&exp) == Types::Bool {
-                        UnaryOperator::Not
-                    } else {
-                        UnaryOperator::BitwiseNot
-                    }
-                },
-                UnOp::Neg => UnaryOperator::Negation,
-            };
-            // push the ne new exp onto the expression: Vec<>
-            expression.push(Expression::UnaryExpression(op, Box::new(exp)));
-        },
-        Rvalue::Use(ref operand) => {
-            expression.push(gen_expression(operand, data));
-        },
-        Rvalue::Aggregate(ref ag_kind, ref vec_operand) => {
-            match *ag_kind {
-                AggregateKind::Tuple => {
-                    for operand in vec_operand.iter() {
-                        expression.push(Expression::VariableMapping(format!("{:?}", operand), gen_ty(operand, data)));
-                    }
-                },
-                _ => panic!("Unsupported aggregate: only tuples are supported"),
+            if a == "ret" {
+                bb = ast::type_to_enum(data.func_return_type);
             }
-        },
-        Rvalue::Cast(..) => { expression.push(var.clone()); },
-        Rvalue::Ref(..) => { expression.push(var.clone()); },
-        Rvalue::Box(..) => unimplemented!(),
-        Rvalue::Len(..) => unimplemented!(),
-        _ => unimplemented!(),
-    };
 
-    // Replace any appearance of var in the weakest precondition with the expression
-    for expr in &expression {
-        substitute_variable_with_expression(&mut wp, &var, expr);
+            Expression::VariableMapping(a.clone(), bb)
+        },
+        Expression::BinaryExpression(a, b, c) => {
+            let aa = walk_and_replace(*a.clone(), data);
+            let ba = b.clone();
+            let ca = walk_and_replace(*c.clone(), data);
+            Expression::BinaryExpression(Box::new(aa), ba, Box::new(ca))
+        },
+        Expression::UnaryExpression(a, b) => {
+            let aa = a.clone();
+            let ba = walk_and_replace(*b.clone(), data);
+            Expression::UnaryExpression(aa, Box::new(ba))
+        },
+        _ => expression.clone()
     }
-    
-    wp
 }
 
 fn parse_condition(condition: String) -> Expression {
