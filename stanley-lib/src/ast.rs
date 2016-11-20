@@ -167,7 +167,7 @@ pub fn determine_evaluation_type(expression: Expression) -> Types {
     match ty_check(expression.clone()) {
         Ok(_) => {
             match expression {
-                Expression::BinaryExpression(ref l, ref op, ref r) => {
+                Expression::BinaryExpression(ref l, ref op, _) => {
                     match *op {
                         BinaryOperator::Addition
                         | BinaryOperator::Subtraction
@@ -192,16 +192,10 @@ pub fn determine_evaluation_type(expression: Expression) -> Types {
                         | BinaryOperator::BiImplication => Types::Bool,
                     }
                 },
-                Expression::UnaryExpression(ref op, ref expr) => {
-                    let expra = expr.clone();
-                    match *op {
-                        UnaryOperator::Negation | UnaryOperator::Not => determine_evaluation_type(*expra),
-                        UnaryOperator::BitwiseNot => determine_evaluation_type(*expra),
-                    }
-                },
-                Expression::VariableMapping(ref name, ref ty) => ty.clone(),
+                Expression::UnaryExpression(_, ref expr) => determine_evaluation_type(*expr.clone()),
+                Expression::VariableMapping(_, ref ty) => *ty,
                 Expression::BooleanLiteral(_) => Types::Bool,
-                Expression::BitVector(ref val, ref ty) => {
+                Expression::BitVector(_, ref ty) => {
                     match *ty {
                         Types::U8 => Types::U8,
                         Types::U16 => Types::U16,
@@ -276,7 +270,7 @@ pub fn ty_check(expression: Expression) -> Result<bool, String> {
                 }
             }
         },
-        Expression::BitVector(ref val, ref ty) => {
+        Expression::BitVector(_, ref ty) => {
             match *ty {
                 Types::U8 => Ok(true),
                 Types::U16 => Ok(true),

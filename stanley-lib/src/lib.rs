@@ -15,6 +15,7 @@ extern crate rustc_data_structures;
 mod ast;
 mod condition_parser;
 
+use z3::*;
 use rustc_plugin::Registry;
 use rustc::mir::transform::{Pass, MirPass, MirSource};
 use rustc::mir::*;
@@ -49,13 +50,8 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             return;
         }
 
-        println!("{:?}\t{:?}\t{}\t{}", mir.return_ty, name, pre_string, post_string);
-
-        let pre_string_expression = parse_condition(pre_string);
+        let mut pre_string_expression = parse_condition(pre_string);
         let mut post_string_expression = parse_condition(post_string);
-        
-        println!("{:?}", pre_string_expression);
-        println!("{:?}", post_string_expression);
 
         let mut data = MirData {
             block_data: Vec::new(),
@@ -81,15 +77,61 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             data.temp_data.push(&mir.local_decls[temp_data]);
         }
 
+        pre_string_expression = walk_and_replace(pre_string_expression, &data);
         post_string_expression = walk_and_replace(post_string_expression, &data);
 
+        ast::ty_check(pre_string_expression.clone()).unwrap();
         ast::ty_check(post_string_expression.clone()).unwrap();
 
-        println!("{:?}", pre_string_expression);
-        println!("{:?}", post_string_expression);
+        /*let weakest_precondition = gen(0, &mut data, &post_expr, debug);
 
-        println!("\n\n\n\n");
+        // Create the verification condition, P -> WP
+        let verification_condition: Expression = Expression::BinaryExpression( BinaryExpressionData{
+            op: BinaryOperator::Implication,
+            left: Box::new(pre_expr.as_ref().unwrap().clone()),
+            right: Box::new(weakest_precondition.as_ref().unwrap().clone())
+        } );
+
+        // FIXME: Debug should not be a const; it must be user-facing
+        if debug {
+            println!("vc: {}\n", verification_condition);
+        }
+        // Check that the verification condition is correctly typed
+        match expression::ty_check(&verification_condition) {
+            Ok(_) => {},
+            Err(e) => rp_error!("{}", e),
+        }*/
+
+        gen_smtlib(&post_string_expression, name);
+        //gen_smtlib(&verification_condition, name);
+
+        println!("\n");
     }
+}
+
+fn gen_smtlib(expression: &Expression, name: String) {
+    let cfg = Config::new();
+    let ctx = Context::new(&cfg);
+
+    let x = ctx.named_int_const("x");
+    let y = ctx.named_int_const("y");
+    let zero = ctx.from_i64(0);
+    let two = ctx.from_i64(2);
+    let seven = ctx.from_i64(7);
+
+    let solver = Solver::new(&ctx);
+    solver.assert(&x.gt(&y));
+    solver.assert(&y.gt(&zero));
+    solver.assert(&y.rem(&seven)._eq(&two));
+    solver.assert(&x.add(&[&two]).gt(&seven));
+    assert!(solver.check());
+
+    let model = solver.get_model();
+    let xv = model.eval(&x).unwrap().as_i64().unwrap();
+    let yv = model.eval(&y).unwrap().as_i64().unwrap();
+    println!("x: {}, y: {}", xv, yv);
+
+    println!("{:?} {:?}", expression, name);
 }
 
 fn get_argument_type(name: String, data: &MirData) -> Types {
