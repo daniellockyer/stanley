@@ -80,8 +80,8 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         pre_string_expression = walk_and_replace(pre_string_expression, &data);
         post_string_expression = walk_and_replace(post_string_expression, &data);
 
-        ast::ty_check(pre_string_expression.clone()).unwrap();
-        ast::ty_check(post_string_expression.clone()).unwrap();
+        ast::ty_check(&pre_string_expression).unwrap();
+        ast::ty_check(&post_string_expression).unwrap();
 
         /*let weakest_precondition = gen(0, &mut data, &post_expr, debug);
 
@@ -130,8 +130,6 @@ fn gen_smtlib(expression: &Expression, name: String) {
     let xv = model.eval(&x).unwrap().as_i64().unwrap();
     let yv = model.eval(&y).unwrap().as_i64().unwrap();
     println!("x: {}, y: {}", xv, yv);
-
-    println!("{:?} {:?}", expression, name);
 }
 
 fn get_argument_type(name: String, data: &MirData) -> Types {

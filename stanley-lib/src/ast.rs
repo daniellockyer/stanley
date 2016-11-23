@@ -163,10 +163,10 @@ impl Debug for Types {
     }
 }
 
-pub fn determine_evaluation_type(expression: Expression) -> Types {
-    match ty_check(expression.clone()) {
+pub fn determine_evaluation_type(expression: &Expression) -> Types {
+    match ty_check(expression) {
         Ok(_) => {
-            match expression {
+            match *expression {
                 Expression::BinaryExpression(ref l, ref op, _) => {
                     match *op {
                         BinaryOperator::Addition
@@ -178,7 +178,7 @@ pub fn determine_evaluation_type(expression: Expression) -> Types {
                         | BinaryOperator::BitwiseRightShift
                         | BinaryOperator::BitwiseOr
                         | BinaryOperator::BitwiseAnd
-                        | BinaryOperator::BitwiseXor => determine_evaluation_type(*l.clone()),
+                        | BinaryOperator::BitwiseXor => determine_evaluation_type(l),
                         BinaryOperator::LessThan
                         | BinaryOperator::LessThanOrEqual
                         | BinaryOperator::GreaterThan
@@ -192,7 +192,7 @@ pub fn determine_evaluation_type(expression: Expression) -> Types {
                         | BinaryOperator::BiImplication => Types::Bool,
                     }
                 },
-                Expression::UnaryExpression(_, ref expr) => determine_evaluation_type(*expr.clone()),
+                Expression::UnaryExpression(_, ref expr) => determine_evaluation_type(expr),
                 Expression::VariableMapping(_, ref ty) => *ty,
                 Expression::BooleanLiteral(_) => Types::Bool,
                 Expression::BitVector(_, ref ty) => {
@@ -220,22 +220,22 @@ pub fn same_signedness(type1: Types, type2: Types) -> bool {
             match type2 {
                 Types::U8 | Types::U16 | Types::U32 | Types::U64 => true,
                 Types::I8 | Types::I16 | Types::I32 | Types::I64 => false,
-                _ => unreachable!()
+                _ => panic!("Cannot find numeric signedness of `{:?}`", type2)
             }
         },
         Types::I8 | Types::I16 | Types::I32 | Types::I64 => {
             match type2 {
                 Types::U8 | Types::U16 | Types::U32 | Types::U64 => false,
                 Types::I8 | Types::I16 | Types::I32 | Types::I64 => true,
-                _ => unreachable!()
+                _ => panic!("Cannot find numeric signedness of `{:?}`", type2)
             }
         },
         _ => panic!("Cannot find numeric signedness of `{:?}`", type1)
     }
 }
 
-pub fn ty_check(expression: Expression) -> Result<bool, String> {
-    match expression {
+pub fn ty_check(expression: &Expression) -> Result<bool, String> {
+    match *expression {
         Expression::BooleanLiteral(_) => Ok(true),
         Expression::VariableMapping(ref name, ref ty) => {
             match *ty {
@@ -246,9 +246,9 @@ pub fn ty_check(expression: Expression) -> Result<bool, String> {
         Expression::UnaryExpression(ref op, ref expr) => {
             match *op {
                 UnaryOperator::Negation => {
-                    match ty_check(*expr.clone()) {
+                    match ty_check(expr) {
                         Ok(_) => {
-                            match determine_evaluation_type(*expr.clone()) {
+                            match determine_evaluation_type(expr) {
                                 Types::Bool => Err(format!("Invalid use of operator {:?} on boolean value {:?}", *op, *expr)),
                                 _ => Ok(true)
                             }
@@ -257,13 +257,13 @@ pub fn ty_check(expression: Expression) -> Result<bool, String> {
                     }
                 },
                 UnaryOperator::BitwiseNot => {
-                    match ty_check(*expr.clone()) {
+                    match ty_check(expr) {
                         Ok(_) => Ok(true),
                         Err(e) => Err(e)
                     }
                 },
                 UnaryOperator::Not => {
-                    match determine_evaluation_type(*expr.clone()) {
+                    match determine_evaluation_type(expr) {
                         Types::Bool => Ok(true),
                         _ => Err(format!("Invalid use of operator {:?} on non-boolean value {:?}", *op, *expr))
                     }
@@ -284,15 +284,12 @@ pub fn ty_check(expression: Expression) -> Result<bool, String> {
             }
         }
         Expression::BinaryExpression(ref l, ref op, ref r) => {
-            let la = *l.clone();
-            let ra = *r.clone();
-
-            match ty_check(*l.clone()) {
+            match ty_check(l) {
                 Ok(_) => {
-                    match ty_check(*r.clone()) {
+                    match ty_check(r) {
                         Ok(_) => {
-                            let l_type: Types = determine_evaluation_type(la);
-                            let r_type: Types = determine_evaluation_type(ra);
+                            let l_type: Types = determine_evaluation_type(l);
+                            let r_type: Types = determine_evaluation_type(r);
 
                             match *op {
                                 BinaryOperator::Addition | BinaryOperator::Subtraction | BinaryOperator::Multiplication | BinaryOperator::Division | BinaryOperator::Modulo => {
