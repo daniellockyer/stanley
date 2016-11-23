@@ -67,24 +67,20 @@ pub enum Types {
 pub fn type_to_enum(x: Ty) -> Types {
     match x.sty {
         TyBool => Types::Bool,
-        TyInt(a) => {
-            match a {
-                I8 => Types::I8,
-                I16 => Types::I16,
-                I32 => Types::I32,
-                I64 => Types::I64,
-                _ => unreachable!() //TODO: Is
-            }
+        TyInt(a) => match a {
+            I8 => Types::I8,
+            I16 => Types::I16,
+            I32 => Types::I32,
+            I64 => Types::I64,
+            _ => unreachable!() //TODO: Is
         },
-        TyUint(a) => {
-            match a {
-                U8 => Types::U8,
-                U16 => Types::U16,
-                U32 => Types::U32,
-                U64 => Types::U64,
-                _ => unreachable!() //TODO: Us
-            }
-        }
+        TyUint(a) => match a {
+            U8 => Types::U8,
+            U16 => Types::U16,
+            U32 => Types::U32,
+            U64 => Types::U64,
+            _ => unreachable!() //TODO: Us
+        },
         _ => Types::Unknown
     }
 }
@@ -214,19 +210,15 @@ pub fn determine_evaluation_type(expression: &Expression) -> Types {
 
 pub fn same_signedness(type1: Types, type2: Types) -> bool {
     match type1 {
-        Types::U8 | Types::U16 | Types::U32 | Types::U64 => {
-            match type2 {
-                Types::U8 | Types::U16 | Types::U32 | Types::U64 => true,
-                Types::I8 | Types::I16 | Types::I32 | Types::I64 => false,
-                _ => panic!("Cannot find numeric signedness of `{:?}`", type2)
-            }
+        Types::U8 | Types::U16 | Types::U32 | Types::U64 => match type2 {
+            Types::U8 | Types::U16 | Types::U32 | Types::U64 => true,
+            Types::I8 | Types::I16 | Types::I32 | Types::I64 => false,
+            _ => panic!("Cannot find numeric signedness of `{:?}`", type2)
         },
-        Types::I8 | Types::I16 | Types::I32 | Types::I64 => {
-            match type2 {
-                Types::U8 | Types::U16 | Types::U32 | Types::U64 => false,
-                Types::I8 | Types::I16 | Types::I32 | Types::I64 => true,
-                _ => panic!("Cannot find numeric signedness of `{:?}`", type2)
-            }
+        Types::I8 | Types::I16 | Types::I32 | Types::I64 => match type2 {
+            Types::U8 | Types::U16 | Types::U32 | Types::U64 => false,
+            Types::I8 | Types::I16 | Types::I32 | Types::I64 => true,
+            _ => panic!("Cannot find numeric signedness of `{:?}`", type2)
         },
         _ => panic!("Cannot find numeric signedness of `{:?}`", type1)
     }
