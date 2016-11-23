@@ -195,19 +195,17 @@ pub fn determine_evaluation_type(expression: &Expression) -> Types {
                 Expression::UnaryExpression(_, ref expr) => determine_evaluation_type(expr),
                 Expression::VariableMapping(_, ref ty) => *ty,
                 Expression::BooleanLiteral(_) => Types::Bool,
-                Expression::BitVector(_, ref ty) => {
-                    match *ty {
-                        Types::U8 => Types::U8,
-                        Types::U16 => Types::U16,
-                        Types::U32 => Types::U32,
-                        Types::U64 => Types::U64,
-                        Types::I8 => Types::I8,
-                        Types::I16 => Types::I16,
-                        Types::I32 => Types::I32,
-                        Types::I64 => Types::I64,
-                        _ => panic!("Invalid or Unsupported integer type: \"{:?}\"", ty)
-                    }
-                },
+                Expression::BitVector(_, ref ty) => match *ty {
+                    Types::U8 => Types::U8,
+                    Types::U16 => Types::U16,
+                    Types::U32 => Types::U32,
+                    Types::U64 => Types::U64,
+                    Types::I8 => Types::I8,
+                    Types::I16 => Types::I16,
+                    Types::I32 => Types::I32,
+                    Types::I64 => Types::I64,
+                    _ => panic!("Invalid or Unsupported integer type: \"{:?}\"", ty)
+                }
             }
         },
         Err(e) => panic!("{}", e),
@@ -237,52 +235,33 @@ pub fn same_signedness(type1: Types, type2: Types) -> bool {
 pub fn ty_check(expression: &Expression) -> Result<bool, String> {
     match *expression {
         Expression::BooleanLiteral(_) => Ok(true),
-        Expression::VariableMapping(ref name, ref ty) => {
-            match *ty {
-                Types::Void => Err(format!("Variable `{}` has void type!", name)),
-                _ => Ok(true)
-            }
+        Expression::VariableMapping(ref name, ref ty) => match *ty {
+            Types::Void => Err(format!("Variable `{}` has void type!", name)),
+            _ => Ok(true)
         },
         Expression::UnaryExpression(ref op, ref expr) => {
             match *op {
-                UnaryOperator::Negation => {
-                    match ty_check(expr) {
-                        Ok(_) => {
-                            match determine_evaluation_type(expr) {
-                                Types::Bool => Err(format!("Invalid use of operator {:?} on boolean value {:?}", *op, *expr)),
-                                _ => Ok(true)
-                            }
-                        },
-                        Err(e) => Err(e)
-                    }
+                UnaryOperator::Negation => match ty_check(expr) {
+                    Ok(_) => match determine_evaluation_type(expr) {
+                        Types::Bool => Err(format!("Invalid use of operator {:?} on boolean value {:?}", *op, *expr)),
+                        _ => Ok(true)
+                    },
+                    Err(e) => Err(e)
                 },
-                UnaryOperator::BitwiseNot => {
-                    match ty_check(expr) {
-                        Ok(_) => Ok(true),
-                        Err(e) => Err(e)
-                    }
+                UnaryOperator::BitwiseNot => match ty_check(expr) {
+                    Ok(_) => Ok(true),
+                    Err(e) => Err(e)
                 },
-                UnaryOperator::Not => {
-                    match determine_evaluation_type(expr) {
-                        Types::Bool => Ok(true),
-                        _ => Err(format!("Invalid use of operator {:?} on non-boolean value {:?}", *op, *expr))
-                    }
+                UnaryOperator::Not => match determine_evaluation_type(expr) {
+                    Types::Bool => Ok(true),
+                    _ => Err(format!("Invalid use of operator {:?} on non-boolean value {:?}", *op, *expr))
                 }
             }
         },
-        Expression::BitVector(_, ref ty) => {
-            match *ty {
-                Types::U8 => Ok(true),
-                Types::U16 => Ok(true),
-                Types::U32 => Ok(true),
-                Types::U64 => Ok(true),
-                Types::I8 => Ok(true),
-                Types::I16 => Ok(true),
-                Types::I32 => Ok(true),
-                Types::I64 => Ok(true),
-                _ => Err(format!("Invalid or unsupported integer type: \"{:?}\"", ty))
-            }
-        }
+        Expression::BitVector(_, ref ty) => match *ty {
+            Types::U8 | Types::U16 | Types::U32 | Types::U64 | Types::I8 | Types::I16 | Types::I32 | Types::I64 => Ok(true),
+            _ => Err(format!("Invalid or unsupported integer type: \"{:?}\"", ty))
+        },
         Expression::BinaryExpression(ref l, ref op, ref r) => {
             match ty_check(l) {
                 Ok(_) => {
