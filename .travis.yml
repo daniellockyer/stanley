@@ -6,5 +6,8 @@ before_install:
   - mkdir -p ~/.local/{bin,lib}
   - export PATH=~/.local/bin:$PATH
   - export LD_LIBRARY_PATH=~/.local/lib:$LD_LIBRARY_PATH
-  - chmod 700 ./travis.sh
-  - ./travis.sh
+  - export Z3_VERSION=4.5.0
+  - wget https://github.com/Z3Prover/z3/releases/download/z3-$Z3_VERSION/z3-$Z3_VERSION-x64-ubuntu-14.04.zip
+  - unzip z3-$Z3_VERSION-x64-ubuntu-14.04.zip
+  - cp z3-$Z3_VERSION-x64-ubuntu-14.04/bin/z3 ~/.local/bin
+  - cp z3-$Z3_VERSION-x64-ubuntu-14.04/bin/*.so ~/.local/lib
