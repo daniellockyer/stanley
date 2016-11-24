@@ -21,8 +21,7 @@ use rustc::mir::transform::{Pass, MirPass, MirSource};
 use rustc::mir::*;
 use rustc::ty::{TyCtxt, Ty};
 use syntax::feature_gate::AttributeType;
-use syntax::codemap::Spanned;
-use syntax::ast::{MetaItemKind, NestedMetaItemKind, Attribute_};
+use syntax::ast::{MetaItemKind, NestedMetaItemKind, Attribute};
 use ast::{Expression, Types};
 
 struct StanleyMir;
@@ -182,21 +181,20 @@ fn parse_condition(condition: String) -> Expression {
     }
 }
 
-fn parse_attributes(attrs: &[Spanned<Attribute_>]) -> (String, String) {
+fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
     let mut pre_string = "".to_string();
     let mut post_string = "".to_string();
 
     for attr in attrs {
-        if let MetaItemKind::List(_, ref items) = attr.node.value.node {
+        if let MetaItemKind::List(ref items) = (*attr).value.node {
             for item in items {
                 if let NestedMetaItemKind::MetaItem(ref i_string) = item.node {
-                    if let MetaItemKind::NameValue(ref attr_param_name, ref literal) = i_string.node {
+                    if let MetaItemKind::NameValue(ref literal) = i_string.node {
                         if let syntax::ast::LitKind::Str(ref attr_param_value, _) = literal.node {
-
-                            match attr_param_name.to_string().as_ref() {
+                            match i_string.name.to_string().as_ref() {
                                 "pre" => pre_string = attr_param_value.to_string(),
                                 "post" => post_string = attr_param_value.to_string(),
-                                _ => panic!("I only accept `pre` and `post`. You gave me \"{}\"", attr_param_name)
+                                _ => panic!("I only accept `pre` and `post`. You gave me \"{}\"", i_string.name)
                             }
                         }
                     }
