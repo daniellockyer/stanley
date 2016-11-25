@@ -3,7 +3,7 @@
 
 #![feature(plugin_registrar, rustc_private)]
 
-extern crate z3;
+//extern crate z3;
 extern crate syntax;
 
 #[macro_use]
@@ -15,7 +15,7 @@ extern crate rustc_data_structures;
 mod ast;
 mod condition_parser;
 
-use z3::*;
+//use z3::*;
 use rustc_plugin::Registry;
 use rustc::mir::transform::{Pass, MirPass, MirSource};
 use rustc::mir::*;
@@ -109,7 +109,7 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
 }
 
 fn gen_smtlib(expression: &Expression, name: String) {
-    let cfg = Config::new();
+    /*let cfg = Config::new();
     let ctx = Context::new(&cfg);
 
     let x = ctx.named_int_const("x");
@@ -128,7 +128,7 @@ fn gen_smtlib(expression: &Expression, name: String) {
     let model = solver.get_model();
     let xv = model.eval(&x).unwrap().as_i64().unwrap();
     let yv = model.eval(&y).unwrap().as_i64().unwrap();
-    println!("x: {}, y: {}", xv, yv);
+    println!("x: {}, y: {}", xv, yv);*/
 }
 
 fn get_argument_type(name: String, data: &MirData) -> Types {
