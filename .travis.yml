@@ -4,5 +4,11 @@ cache: cargo
 rust:
   - nightly
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-cache search z3
+  - mkdir -p ~/.local/{bin,lib}
+  - export PATH=~/.local/bin:$PATH
+  - export LD_LIBRARY_PATH=~/.local/lib:$LD_LIBRARY_PATH
+  - export Z3_VERSION=4.5.0
+  - wget https://github.com/Z3Prover/z3/releases/download/z3-$Z3_VERSION/z3-$Z3_VERSION-x64-ubuntu-14.04.zip
+  - unzip z3-$Z3_VERSION-x64-ubuntu-14.04.zip
+  - cp z3-$Z3_VERSION-x64-ubuntu-14.04/bin/z3 ~/.local/bin
+  - cp z3-$Z3_VERSION-x64-ubuntu-14.04/bin/*.so ~/.local/lib
