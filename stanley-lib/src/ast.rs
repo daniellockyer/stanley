@@ -56,10 +56,12 @@ pub enum Types {
     I16,
     I32,
     I64,
+    /*I128,*/
     U8,
     U16,
     U32,
     U64,
+    /*U128,*/
     Void,
     Unknown
 }
@@ -72,6 +74,7 @@ pub fn type_to_enum(x: Ty) -> Types {
             I16 => Types::I16,
             I32 => Types::I32,
             I64 => Types::I64,
+            /*I128 => Types::I128,*/
             _ => unreachable!() //TODO: Is
         },
         TyUint(a) => match a {
@@ -79,6 +82,7 @@ pub fn type_to_enum(x: Ty) -> Types {
             U16 => Types::U16,
             U32 => Types::U32,
             U64 => Types::U64,
+            /*U128 => Types::U128,*/
             _ => unreachable!() //TODO: Us
         },
         _ => Types::Unknown
@@ -149,10 +153,12 @@ impl Debug for Types {
             Types::I16 => { write!(fmt, "i16") },
             Types::I32 => { write!(fmt, "i32") },
             Types::I64 => { write!(fmt, "i64") },
+            /*Types::I128 => { write!(fmt, "i128") },*/
             Types::U8 => { write!(fmt, "u8") },
             Types::U16 => { write!(fmt, "u16") },
             Types::U32 => { write!(fmt, "u32") },
             Types::U64 => { write!(fmt, "u64") },
+            /*Types::U128 => { write!(fmt, "u128") },*/
             Types::Void => { write!(fmt, "()") },
             Types::Unknown => { write!(fmt, "?") }
         }
@@ -196,31 +202,33 @@ pub fn determine_evaluation_type(expression: &Expression) -> Types {
                     Types::U16 => Types::U16,
                     Types::U32 => Types::U32,
                     Types::U64 => Types::U64,
+                    /*Types::U128 => Types::U128,*/
                     Types::I8 => Types::I8,
                     Types::I16 => Types::I16,
                     Types::I32 => Types::I32,
                     Types::I64 => Types::I64,
-                    _ => panic!("Invalid or Unsupported integer type: \"{:?}\"", ty)
+                    /*Types::I128 => Types::I128,*/
+                    _ => error!("Invalid or Unsupported integer type: \"{:?}\"", ty)
                 }
             }
         },
-        Err(e) => panic!("{}", e),
+        Err(e) => error!("{}", e),
     }
 }
 
 pub fn same_signedness(type1: Types, type2: Types) -> bool {
     match type1 {
-        Types::U8 | Types::U16 | Types::U32 | Types::U64 => match type2 {
-            Types::U8 | Types::U16 | Types::U32 | Types::U64 => true,
-            Types::I8 | Types::I16 | Types::I32 | Types::I64 => false,
-            _ => panic!("Cannot find numeric signedness of `{:?}`", type2)
+        Types::U8 | Types::U16 | Types::U32 | Types::U64 /*| Types::U128 */ => match type2 {
+            Types::U8 | Types::U16 | Types::U32 | Types::U64 /*| Types::U128*/ => true,
+            Types::I8 | Types::I16 | Types::I32 | Types::I64 /*| Types::I128*/ => false,
+            _ => error!("Cannot find numeric signedness of `{:?}`", type2)
         },
-        Types::I8 | Types::I16 | Types::I32 | Types::I64 => match type2 {
-            Types::U8 | Types::U16 | Types::U32 | Types::U64 => false,
-            Types::I8 | Types::I16 | Types::I32 | Types::I64 => true,
-            _ => panic!("Cannot find numeric signedness of `{:?}`", type2)
+        Types::I8 | Types::I16 | Types::I32 | Types::I64 /*| Types::I128 */ => match type2 {
+            Types::U8 | Types::U16 | Types::U32 | Types::U64 /*| Types::U128*/ => false,
+            Types::I8 | Types::I16 | Types::I32 | Types::I64 /*| Types::I128*/ => true,
+            _ => error!("Cannot find numeric signedness of `{:?}`", type2)
         },
-        _ => panic!("Cannot find numeric signedness of `{:?}`", type1)
+        _ => error!("Cannot find numeric signedness of `{:?}`", type1)
     }
 }
 
@@ -251,7 +259,7 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
             }
         },
         Expression::BitVector(_, ref ty) => match *ty {
-            Types::U8 | Types::U16 | Types::U32 | Types::U64 | Types::I8 | Types::I16 | Types::I32 | Types::I64 => Ok(true),
+            Types::U8 | Types::U16 | Types::U32 | Types::U64 /*| Types::U128*/ | Types::I8 | Types::I16 | Types::I32 | Types::I64 /*| Types::I128*/ => Ok(true),
             _ => Err(format!("Invalid or unsupported integer type: \"{:?}\"", ty))
         },
         Expression::BinaryExpression(ref l, ref op, ref r) => {
@@ -320,6 +328,6 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
                 },
                 Err(e) => Err(e)
             }
-        }   
+        }
     }
 }

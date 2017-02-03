@@ -6,14 +6,10 @@
 //extern crate z3;
 extern crate syntax;
 
-#[macro_use]
 extern crate rustc;
 extern crate rustc_plugin;
 extern crate rustc_trans;
 extern crate rustc_data_structures;
-
-mod ast;
-mod condition_parser;
 
 //use z3::*;
 use rustc_plugin::Registry;
@@ -23,6 +19,24 @@ use rustc::ty::{TyCtxt, Ty};
 use syntax::feature_gate::AttributeType;
 use syntax::ast::{MetaItemKind, NestedMetaItemKind, Attribute};
 use ast::{Expression, Types};
+
+#[macro_export]
+macro_rules! error {
+    ($($args:tt)*) => {
+        {
+            use std::io::Write;
+            let stderr = ::std::io::stderr();
+            let mut stderr = stderr.lock();
+            write!(stderr, "\n[!] error:\n").unwrap();
+            writeln!(stderr, $($args)*).unwrap();
+            write!(stderr, "\n\n").unwrap();
+            ::std::process::exit(1)
+		}
+	}
+}
+
+mod ast;
+mod condition_parser;
 
 struct StanleyMir;
 
@@ -39,9 +53,10 @@ impl <'tcx> Pass for StanleyMir {}
 impl <'tcx> MirPass<'tcx> for StanleyMir {
     fn run_pass<'a>(&mut self, tcx: TyCtxt<'a, 'tcx, 'tcx>, src: MirSource, mir: &mut Mir<'tcx>) {
         let item_id = src.item_id();
-        let def_id = tcx.map.local_def_id(item_id);
+
+        let def_id = tcx.hir.local_def_id(item_id);
         let name = tcx.item_path_str(def_id);
-        let attrs = tcx.map.attrs(item_id);
+        let attrs = tcx.hir.attrs(item_id);
 
         let (pre_string, post_string) = parse_attributes(attrs);
 
@@ -76,11 +91,17 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             data.temp_data.push(&mir.local_decls[temp_data]);
         }
 
+        println!("{:#?}", pre_string_expression);
+        println!("{:#?}", post_string_expression);
+
         pre_string_expression = walk_and_replace(pre_string_expression, &data);
         post_string_expression = walk_and_replace(post_string_expression, &data);
 
-        ast::ty_check(&pre_string_expression).unwrap();
-        ast::ty_check(&post_string_expression).unwrap();
+        println!("{:#?}", pre_string_expression);
+        println!("{:#?}", post_string_expression);
+
+        ast::ty_check(&pre_string_expression).unwrap_or_else(|e| error!("{}", e));
+        ast::ty_check(&post_string_expression).unwrap_or_else(|e| error!("{}", e));
 
         /*let weakest_precondition = gen(0, &mut data, &post_expr, debug);
 
@@ -177,7 +198,7 @@ fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
 fn parse_condition(condition: String) -> Expression {
     match condition_parser::parse_Condition(&*condition) {
         Ok(e) => e,
-        Err(e) => panic!("Error parsing condition \"{}\" with error \"{:?}\"", condition, e)
+        Err(e) => error!("Error parsing condition \"{}\" with error \"{:?}\"", condition, e)
     }
 }
 
@@ -194,7 +215,7 @@ fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
                             match i_string.name.to_string().as_ref() {
                                 "pre" => pre_string = attr_param_value.to_string(),
                                 "post" => post_string = attr_param_value.to_string(),
-                                _ => panic!("I only accept `pre` and `post`. You gave me \"{}\"", i_string.name)
+                                _ => error!("I only accept `pre` and `post`. You gave me \"{}\"", i_string.name)
                             }
                         }
                     }
