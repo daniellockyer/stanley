@@ -2,22 +2,13 @@
 #![plugin(stanlib)]
 #![allow(dead_code)]
 
-#[condition(pre="true", post="ret == (x < 10:i32)")]
-fn check_less_than_ten(x: i32) -> bool {
-    if x < 10 { //buggy
+#[condition(pre="true", post="ret == (x < 8:i32)")]
+fn check_less_than_eight(x: i32) -> bool {
+    if x < 8 { //buggy - remove equals
         true
     } else {
         false
     }
-}
-
-#[condition(pre="true", post="ret == (x - 5:i32)")]
-fn weird_param_minus_five(x: i32) -> i32 {
-    if x > 10 {
-        x - 2;
-    }
-
-    x - 5
 }
 
 #[condition(pre="true", post="ret == (x - 5:i32)")]
@@ -27,13 +18,13 @@ fn param_minus_five(x: i32) -> i32 {
 
 #[condition(pre="true", post="ret == (x < 5:i32)")]
 fn check_less_than_five(x:i32) -> bool {
-    x < 5
+    x < 5 // buggy - change to 5
 }
 
 #[condition(pre="true", post="ret == !x")]
 fn boolean_not(x:bool) -> bool {
     if x == true {
-        false
+        false // buggy - change to false
     } else {
         true
     }
@@ -48,7 +39,7 @@ fn boolean_not2(x:bool) -> bool {
     }
 }
 
-#[condition(pre="(x <= 100:i32 - 5:i32)", post="ret == (x + 5:i32)")]
+#[condition(pre="x <= 100:i32 - 5:i32", post="ret == (x + 5:i32)")]
 fn add_five(x:i32) -> i32 {
     assert!(x <= 100 - 5);
     x + 5

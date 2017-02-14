@@ -344,11 +344,26 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
             let rvalue = gen_expression(rval, data);
 
             let op: BinaryOperator = match *binop {
-                BinOp::Add => BinaryOperator::Addition,
-                BinOp::Sub => BinaryOperator::Subtraction,
-                BinOp::Mul => BinaryOperator::Multiplication,
-                BinOp::Div => BinaryOperator::Division,
-                BinOp::Rem => BinaryOperator::Modulo,
+                BinOp::Add => {
+                    wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    BinaryOperator::Addition
+                },
+                BinOp::Sub => {
+                    wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    BinaryOperator::Subtraction
+                },
+                BinOp::Mul => {
+                    wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    BinaryOperator::Multiplication
+                },
+                BinOp::Div => {
+                    wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    BinaryOperator::Division
+                },
+                BinOp::Rem => {
+                    wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    BinaryOperator::Modulo
+                },
                 BinOp::BitOr => BinaryOperator::BitwiseOr,
                 BinOp::BitAnd => BinaryOperator::BitwiseAnd,
                 BinOp::BitXor => BinaryOperator::BitwiseXor,
