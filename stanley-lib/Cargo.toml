@@ -10,6 +10,8 @@ plugin = true
 
 [dependencies]
 z3 = "0.2.0"
+rustproof-libsmt = "0.1.0"
+petgraph = "0.2.7"
 
 [build-dependencies.lalrpop]
 version = "0.12.0"

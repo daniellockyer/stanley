@@ -3,7 +3,8 @@
 
 #![feature(plugin_registrar, rustc_private)]
 
-extern crate z3;
+#[macro_use] extern crate rustproof_libsmt;
+extern crate petgraph;
 extern crate syntax;
 
 extern crate rustc;
@@ -12,7 +13,6 @@ extern crate rustc_trans;
 extern crate rustc_data_structures;
 extern crate rustc_const_math;
 
-use z3::*;
 use rustc_plugin::Registry;
 use rustc::mir::transform::{Pass, MirPass, MirSource};
 use rustc::mir::*;
@@ -23,6 +23,15 @@ use syntax::feature_gate::AttributeType;
 use syntax::ast::{MetaItemKind, NestedMetaItemKind, Attribute};
 use ast::{Expression, BinaryOperator, UnaryOperator, Types};
 use rustc_data_structures::indexed_vec::Idx;
+
+use rustproof_libsmt::backends::smtlib2::*;
+use rustproof_libsmt::backends::backend::*;
+use rustproof_libsmt::backends::z3;
+use rustproof_libsmt::theories::{bitvec, core};
+use rustproof_libsmt::logics::qf_abv::*;
+use petgraph::graph::NodeIndex;
+
+use std::fmt::Debug;
 
 #[macro_export]
 macro_rules! error {
@@ -44,9 +53,6 @@ struct StanleyMir;
 
 pub struct MirData<'tcx> {
     block_data: Vec<&'tcx BasicBlockData<'tcx>>,
-/*    arg_data: Vec<&'tcx LocalDecl<'tcx>>,
-    var_data: Vec<&'tcx LocalDecl<'tcx>>,
-    temp_data: Vec<&'tcx LocalDecl<'tcx>>,*/
     mir: &'tcx Mir<'tcx>,
     func_return_type: Ty<'tcx>,
 }
@@ -72,27 +78,12 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
 
         let mut data = MirData {
             block_data: Vec::new(),
-     /*       arg_data: Vec::new(),
-            var_data: Vec::new(),
-            temp_data: Vec::new(),*/
             mir: mir,
             func_return_type: mir.return_ty
         };
 
         for block in mir.basic_blocks() {
             data.block_data.push(block);
-        }
-
-        for arg_data in mir.args_iter() {
-            data.arg_data.push(&mir.local_decls[arg_data]);
-        }
-
-        for var_data in mir.vars_iter() {
-            data.var_data.push(&mir.local_decls[var_data]);
-        }
-
-        for temp_data in mir.temps_iter() {
-            data.temp_data.push(&mir.local_decls[temp_data]);
         }
 
         //println!("{:#?}", pre_string_expression);
@@ -107,6 +98,8 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         ast::ty_check(&pre_string_expression).unwrap_or_else(|e| error!("{}", e));
         ast::ty_check(&post_string_expression).unwrap_or_else(|e| error!("{}", e));
 
+        print!("----- {} -- ", name);
+
         let weakest_precondition = gen(0, &data, &post_string_expression);
 
         // Create the verification condition, P -> WP
@@ -115,44 +108,103 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             ast::BinaryOperator::Implication,
             Box::new(weakest_precondition.clone())
         );
-        
-        println!("{:?}", verification_condition);
 
         // Check that the verification condition is correctly typed
         ast::ty_check(&verification_condition).unwrap_or_else(|e| error!("{}", e));
 
-        println!("\n\nVerification Condition: {:?}\n", verification_condition);
+        let mut z3: z3::Z3 = Default::default();
+        let mut solver = SMTLib2::new(Some(QF_ABV));
+        let vcon = solver.expr2smtlib(&verification_condition);
+        let _ = solver.assert(core::OpCodes::Not, &[vcon]);
+        let (_, check) = solver.solve(&mut z3, false);
 
-        /*let cfg = Config::new();
-        let ctx = Context::new(&cfg);
+        match check {
+            SMTRes::Sat(_, ref model) => println!("Verification Condition is not valid.\n\n{}", model.clone().unwrap()),
+            SMTRes::Unsat(..) => println!("Verification Condition is valid."),
+            SMTRes::Error(ref error, _) => println!("Error in Verification Condition Generation.\n{}\n", error)
+        }
+    }
+}
 
-        let x = ctx.named_int_const("x");
-        let y = ctx.named_int_const("y");
-        let zero = ctx.from_i64(0);
-        let two = ctx.from_i64(2);
-        let seven = ctx.from_i64(7);
+pub trait Pred2SMT {
+    type Idx: Debug + Clone;
+    type Logic: Logic;
 
-        let solver = Solver::new(&ctx);
-        solver.assert(&x.gt(&y));
-        solver.assert(&y.gt(&zero));
-        solver.assert(&y.rem(&seven)._eq(&two));
-        solver.assert(&x.add(&[&two]).gt(&seven));
-        assert!(solver.check());
+    fn expr2smtlib (&mut self, &Expression) -> Self::Idx;
+}
 
-        let model = solver.get_model();
-        let xv = model.eval(&x).unwrap().as_i64().unwrap();
-        let yv = model.eval(&y).unwrap().as_i64().unwrap();
-        println!("x: {}, y: {}", xv, yv);*/
+impl Pred2SMT for SMTLib2<QF_ABV> {
+    type Idx = NodeIndex;
+    type Logic = QF_ABV;
 
-        println!("\n------------------------------------\n");
+    fn expr2smtlib (&mut self, vc: &Expression) -> Self::Idx {
+        match *vc {
+            Expression::BinaryExpression (ref left, ref op, ref right) => {
+                let l = self.expr2smtlib(left.as_ref());
+                let r = self.expr2smtlib(right.as_ref());
+
+                match *op {
+                    BinaryOperator::Addition => self.assert(bitvec::OpCodes::BvAdd, &[l,r]),
+                    BinaryOperator::Subtraction => self.assert(bitvec::OpCodes::BvSub, &[l,r]),
+                    BinaryOperator::Multiplication => self.assert(bitvec::OpCodes::BvMul, &[l,r]),
+                    BinaryOperator::Division => self.assert(bitvec::OpCodes::BvSDiv, &[l,r]),
+                    BinaryOperator::Modulo => self.assert(bitvec::OpCodes::BvSMod, &[l,r]),
+                    BinaryOperator::BitwiseOr => self.assert(core::OpCodes::Or, &[l,r]),
+                    BinaryOperator::BitwiseAnd => self.assert(core::OpCodes::And, &[l,r]),
+                    BinaryOperator::BitwiseXor => self.assert(core::OpCodes::Xor, &[l,r]),
+                    BinaryOperator::BitwiseLeftShift => self.assert(bitvec::OpCodes::BvShl, &[l,r]),
+                    BinaryOperator::BitwiseRightShift => self.assert(bitvec::OpCodes::BvAShr, &[l,r]),
+                    BinaryOperator::LessThan => self.assert(bitvec::OpCodes::BvSLt, &[l,r]),
+                    BinaryOperator::LessThanOrEqual => self.assert(bitvec::OpCodes::BvSLe, &[l,r]),
+                    BinaryOperator::GreaterThan => self.assert(bitvec::OpCodes::BvSGt, &[l,r]),
+                    BinaryOperator::GreaterThanOrEqual => self.assert(bitvec::OpCodes::BvSGe, &[l,r]),
+                    BinaryOperator::Equal | BinaryOperator::BiImplication => self.assert(core::OpCodes::Cmp, &[l,r]),
+                    BinaryOperator::NotEqual => {
+                        let eq = self.assert(core::OpCodes::Cmp, &[l,r]);
+                        self.assert(core::OpCodes::Not, &[eq])
+                    },
+                    BinaryOperator::And => self.assert(core::OpCodes::And, &[l,r]),
+                    BinaryOperator::Or => self.assert(core::OpCodes::Or, &[l,r]),
+                    BinaryOperator::Xor => return self.assert(core::OpCodes::Xor, &[l,r]),
+                    BinaryOperator::Implication => return self.assert(core::OpCodes::Imply, &[l,r])
+                }
+            },
+            Expression::UnaryExpression (ref op, ref e) => {
+                let n = self.expr2smtlib(e.as_ref());
+                match *op {
+                    UnaryOperator::Negation => self.assert(bitvec::OpCodes::BvNeg, &[n]),
+                    UnaryOperator::Not => self.assert(core::OpCodes::Not, &[n]),
+                }
+            },
+            Expression::VariableMapping (ref v, ref ty) => {
+                let sort = match *ty {
+                    Types::Bool => bitvec::Sorts::Bool,
+                    Types::I8 | Types::U8 => bitvec::Sorts::BitVector(8),
+                    Types::I16 | Types::U16 => bitvec::Sorts::BitVector(16),
+                    Types::I32 | Types::U32 => bitvec::Sorts::BitVector(32),
+                    Types::I64 | Types::U64 => bitvec::Sorts::BitVector(64),
+                    Types::Void | Types::Unknown => unreachable!(),
+                };
+                return self.new_var(Some(&v), sort);
+            },
+            Expression::BooleanLiteral (ref b) => self.new_const(core::OpCodes::Const(*b)),
+            Expression::BitVector (ref value, ref size) => bv_const!(self, *value as u64, bitvector_size(*size))
+        }
+    }
+}
+
+fn bitvector_size(ty: Types) -> usize {
+    match ty {
+        Types::I8 | Types::U8 => 8,
+        Types::I16 | Types::U16 => 16,
+        Types::I32 | Types::U32 => 32,
+        Types::I64 | Types::U64 => 64,
+        _ => unreachable!()
     }
 }
 
 fn gen(index: usize, data: &MirData, post_expression: &Expression) -> Expression {
     let mut wp: Expression = Expression::VariableMapping("!!!!".to_string(), Types::Void);
-
-    println!("Visiting {}", index);
-    println!("Terminator: {:?}", data.block_data[index].terminator);
 
     match data.block_data[index].terminator.clone().unwrap().kind {
         TerminatorKind::Assert{target, ..} | TerminatorKind::Goto{target} => { wp = gen(target.index(), data, post_expression); },
@@ -192,12 +244,12 @@ fn gen(index: usize, data: &MirData, post_expression: &Expression) -> Expression
             TerminatorKind::Resume | TerminatorKind::Switch{..} | TerminatorKind::SwitchInt{..} => unimplemented!(),
     }
 
-    /*let mut stmts = data.block_data[index].statements.clone();
+    let mut stmts = data.block_data[index].statements.clone();
     stmts.reverse();
 
     for stmt in stmts {
         wp = gen_stmt(wp, stmt, data);
-    }*/
+    }
 
     wp
 }
@@ -206,16 +258,19 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
     match lvalue {
         Lvalue::Local(index) => {
             match data.mir.local_kind(index) {
-                LocalKind::Arg => Expression::VariableMapping(data.arg_data[index.index()].name.unwrap().as_str().to_string(), ast::string_to_type(data.arg_data[index.index()].ty.clone().to_string())),
+                LocalKind::Arg => Expression::VariableMapping(data.mir.local_decls[index].name.unwrap().as_str().to_string(), ast::string_to_type(data.mir.local_decls[index].ty.clone().to_string())),
                 LocalKind::Temp => {
-                    let ty = data.mir.local_decls[index].ty.clone().to_string();
-                    if let TypeVariants::TyTuple(_, t) = data.temp_data[index.index()].ty.sty {
-                        t.to_string();
+                    let mut ty = data.mir.local_decls[index].ty.clone().to_string();
+                    
+                    if let TypeVariants::TyTuple(s, _) = data.mir.local_decls[index].ty.sty {
+                        if s.len() > 0 {
+                            ty = s[0].to_string();
+                        }
                     }
                     Expression::VariableMapping("tmp".to_string() + index.index().to_string().as_str(), ast::string_to_type(ty))
                 },
-                LocalKind::Var => Expression::VariableMapping("var".to_string() + index.index().to_string().as_str(), ast::string_to_type(data.var_data[index.index()].ty.clone().to_string())),
-                LocalKind::ReturnPointer => Expression::VariableMapping("return".to_string(), ast::type_to_enum(data.func_return_type.clone())),
+                LocalKind::Var => Expression::VariableMapping("var".to_string() + index.index().to_string().as_str(), ast::string_to_type(data.mir.local_decls[index].ty.clone().to_string())),
+                LocalKind::ReturnPointer => Expression::VariableMapping("ret".to_string(), ast::type_to_enum(data.func_return_type.clone())),
             }
         },
         Lvalue::Projection(pro) => {
@@ -229,27 +284,25 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
 
             match pro.as_ref().base {
                 Lvalue::Local(variable) => {
-                    let index = variable.index();
-
                     match data.mir.local_kind(variable) {
                         LocalKind::Arg => {
-                            lvalue_name = data.arg_data[index].name.unwrap().as_str().to_string();
-                            lvalue_type_string = data.arg_data[index].ty.clone().to_string();
+                            lvalue_name = data.mir.local_decls[variable].name.unwrap().as_str().to_string();
+                            lvalue_type_string = data.mir.local_decls[variable].ty.clone().to_string();
                         },
                         LocalKind::Temp => {
-                            lvalue_name = "tmp".to_string() + index.to_string().as_str();
+                            lvalue_name = "tmp".to_string() + variable.index().to_string().as_str();
 
-                            match data.temp_data[index].ty.sty {
-                                TypeVariants::TyTuple(_, t) => lvalue_type_string = t.to_string(),
+                            match data.mir.local_decls[variable].ty.sty {
+                                TypeVariants::TyTuple(s, _) => lvalue_type_string = s[0].to_string(),
                                 _ => unimplemented!(),
                             }
                         },
                         LocalKind::Var => {
                             let i = index2.parse::<usize>().unwrap();
-                            lvalue_name = "var".to_string() + index.to_string().as_str();
+                            lvalue_name = "var".to_string() + variable.index().to_string().as_str();
 
-                            match data.var_data[index].ty.sty {
-                                TypeVariants::TyTuple(_, t) => lvalue_type_string = t.to_string(),
+                            match data.mir.local_decls[variable].ty.sty {
+                                TypeVariants::TyTuple(s, _) => lvalue_type_string = s[i].to_string(),
                                 _ => unimplemented!(),
                             }
                         },
@@ -315,13 +368,7 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
             let exp = gen_expression(val, data);
 
             let op = match *unop {
-                UnOp::Not => {
-                    if ast::determine_evaluation_type(&exp) == Types::Bool {
-                        UnaryOperator::Not
-                    } else {
-                        UnaryOperator::BitwiseNot
-                    }
-                },
+                UnOp::Not => UnaryOperator::Not,
                 UnOp::Neg => UnaryOperator::Negation,
             };
 
@@ -340,12 +387,8 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
         Rvalue::Box(..) | Rvalue::Len(..) | _ => unimplemented!()
     };
 
-
-    // Replace any appearance of var in the weakest precondition with the expression
     for expr in &expression {
-        println!("\n\n\t{:?}\nRep\t{:?} to\t{:?}", wp, var, expr);
         wp = substitute_variable_with_expression(&wp, &var, expr);
-        println!("\t{:?}", wp);
     }
 
     wp
@@ -373,9 +416,7 @@ fn gen_ty(operand: &Operand, data: &MirData) -> Types {
             match *lvalue {
                 Lvalue::Local(ref variable) => {
                     match data.mir.local_kind(*variable) {
-                        LocalKind::Arg => data.arg_data[variable.index()].ty.to_string(),
-                        LocalKind::Temp => data.temp_data[variable.index()].ty.to_string(),
-                        LocalKind::Var => data.var_data[variable.index()].ty.to_string(),
+                        LocalKind::Arg | LocalKind::Temp | LocalKind::Var => data.mir.local_decls[*variable].ty.to_string(),
                         _ => unimplemented!()
                     }
                 },
@@ -388,12 +429,14 @@ fn gen_ty(operand: &Operand, data: &MirData) -> Types {
 }
 
 fn get_argument_type(name: String, data: &MirData) -> Types {
-    for arg in data.arg_data.iter() {
-        let a = arg.name.unwrap().as_str();
+    for arg in data.mir.args_iter() {
+        let ref arg2 = data.mir.local_decls[arg];
+
+        let a = arg2.name.unwrap().as_str();
         let arg_name = String::from_utf8_lossy(a.as_bytes());
 
         if name == arg_name {
-            return ast::type_to_enum(arg.ty)
+            return ast::type_to_enum(arg2.ty)
         }
     }
     Types::Unknown

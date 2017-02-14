@@ -33,8 +33,7 @@ E10: Expression = {
 
 UOP: UnaryOperator = {
     "-" => UnaryOperator::Negation,
-    "!" => UnaryOperator::BitwiseNot,
-    "NOT" => UnaryOperator::Not,
+    "!" => UnaryOperator::Not
 };
 
 BOP1: BinaryOperator = {

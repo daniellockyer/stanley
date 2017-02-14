@@ -2,9 +2,9 @@
 #![plugin(stanlib)]
 #![allow(dead_code)]
 
-/*#[condition(pre="true", post="ret == (x < 10:i32)")]
+#[condition(pre="true", post="ret == (x < 10:i32)")]
 fn check_less_than_ten(x: i32) -> bool {
-    if x <= 10 { //buggy
+    if x < 10 { //buggy
         true
     } else {
         false
@@ -12,9 +12,9 @@ fn check_less_than_ten(x: i32) -> bool {
 }
 
 #[condition(pre="true", post="ret == (x - 5:i32)")]
-fn param_minus_five(x: i32) -> i32 {
+fn weird_param_minus_five(x: i32) -> i32 {
     if x > 10 {
-        return x - 2
+        x - 2;
     }
 
     x - 5
@@ -38,7 +38,7 @@ fn boolean_not(x:bool) -> bool {
         true
     }
 }
-*/
+
 #[condition(pre="true", post="(x == true => ret == false) && (x == false => ret == true)")]
 fn boolean_not2(x:bool) -> bool {
     if x == true {
@@ -47,7 +47,7 @@ fn boolean_not2(x:bool) -> bool {
         true
     }
 }
-/*
+
 #[condition(pre="(x <= 100:i32 - 5:i32)", post="ret == (x + 5:i32)")]
 fn add_five(x:i32) -> i32 {
     assert!(x <= 100 - 5);
@@ -70,7 +70,6 @@ fn selection(xs: &mut [u32]) {
         i = i + 1;
     }
 }
-*/
 */
 fn main() {
 }

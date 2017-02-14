@@ -45,7 +45,6 @@ pub enum BinaryOperator {
 #[derive(Clone, PartialEq)]
 pub enum UnaryOperator {
     Negation,
-    BitwiseNot,
     Not,
 }
 
@@ -116,9 +115,9 @@ impl Debug for Expression {
         match *self {
             Expression::BinaryExpression(ref l, op, ref r) => write!(fmt, "BiExp({:?} {:?} {:?})", l, op, r),
             Expression::UnaryExpression(ref op, ref r) => write!(fmt, "UnExp({:?} {:?})", op, r),
-            Expression::VariableMapping (ref name, ref var_type) => write!(fmt, "VarMap({:?}:{:?})", name, var_type),
-            Expression::BitVector(ref val, ref s) => write!(fmt, "BitVec({:?}:{:?})", val, s),
-            Expression::BooleanLiteral(b) => write!(fmt, "Bool({:?})", b)
+            Expression::VariableMapping (ref name, ref var_type) => write!(fmt, "VM({:?}:{:?})", name, var_type),
+            Expression::BitVector(ref val, ref s) => write!(fmt, "BV({:?}:{:?})", val, s),
+            Expression::BooleanLiteral(b) => write!(fmt, "B({:?})", b)
         }
     }
 }
@@ -155,7 +154,6 @@ impl Debug for UnaryOperator {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
         match *self {
             UnaryOperator::Negation => { write!(fmt, "-") },
-            UnaryOperator::BitwiseNot => { write!(fmt, "!") },
             UnaryOperator::Not => { write!(fmt, "NOT") }
         }
     }
@@ -262,10 +260,6 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
                         Types::Bool => Err(format!("Invalid use of operator {:?} on boolean value {:?}", *op, *expr)),
                         _ => Ok(true)
                     },
-                    Err(e) => Err(e)
-                },
-                UnaryOperator::BitwiseNot => match ty_check(expr) {
-                    Ok(_) => Ok(true),
                     Err(e) => Err(e)
                 },
                 UnaryOperator::Not => match determine_evaluation_type(expr) {
