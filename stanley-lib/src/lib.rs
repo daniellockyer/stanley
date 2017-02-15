@@ -345,23 +345,23 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
 
             let op: BinaryOperator = match *binop {
                 BinOp::Add => {
-                    wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    //wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
                     BinaryOperator::Addition
                 },
                 BinOp::Sub => {
-                    wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    //wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
                     BinaryOperator::Subtraction
                 },
                 BinOp::Mul => {
-                    wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    //wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
                     BinaryOperator::Multiplication
                 },
                 BinOp::Div => {
-                    wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    //wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
                     BinaryOperator::Division
                 },
                 BinOp::Rem => {
-                    wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    //wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
                     BinaryOperator::Modulo
                 },
                 BinOp::BitOr => BinaryOperator::BitwiseOr,
@@ -380,14 +380,12 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
             expression.push(Expression::BinaryExpression(Box::new(lvalue), op, Box::new(rvalue)));
         },
         Rvalue::UnaryOp(ref unop, ref val) => {
-            let exp = gen_expression(val, data);
-
             let op = match *unop {
                 UnOp::Not => UnaryOperator::Not,
                 UnOp::Neg => UnaryOperator::Negation,
             };
 
-            expression.push(Expression::UnaryExpression(op, Box::new(exp)));
+            expression.push(Expression::UnaryExpression(op, Box::new(gen_expression(val, data))));
         },
         Rvalue::Use(ref operand) => { expression.push(gen_expression(operand, data)); },
         Rvalue::Aggregate(ref ag_kind, ref vec_operand) => match *ag_kind {
@@ -408,6 +406,45 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
 
     wp
 }
+/*
+fn overflow_check(wp: &Expression, var: &Expression, binop: &BinOp, lvalue: &Expression, rvalue: &Expression) -> Expression {
+    match var {
+        Expression::VariableMapping(name, ty) => Expression::BinaryExpression(Box::new(wp.clone()), BinaryOperator::And, Box::new(
+            match var.var_type {
+                Types::I8 => signed_overflow(binop, 8u8, lvalue, rvalue),
+                Types::I16 => signed_overflow(binop, 16u8, lvalue, rvalue),
+                Types::I32 => signed_overflow(binop, 32u8, lvalue, rvalue),
+                Types::I64 => signed_overflow(binop, 64u8, lvalue, rvalue),
+                Types::U8 | Types::U16 | Types::U32 | Types::U64 => {
+                    unsigned_overflow(binop, lvalue, rvalue)
+                },
+                _ => panic!("Unsupported return type of binary operation: {}", var.var_type),
+            }
+        )),
+        _ => unimplemented!()
+    }
+}
+
+fn signed_overflow(binop: &BinOp, size: u8, lvalue: &Expression, rvalue: &Expression) -> Expression {
+    match *binop {
+        BinOp::Add => signed_add(size, lvalue, rvalue),
+        BinOp::Mul => signed_mul(lvalue, rvalue),
+        BinOp::Sub => signed_sub(size, lvalue, rvalue),
+        BinOp::Div => signed_div(size, lvalue, rvalue),
+        BinOp::Rem => signed_div(size, lvalue, rvalue),
+        BinOp::Shl => unimplemented!(),
+        BinOp::Shr => unimplemented!(),
+        BinOp::BitOr => unimplemented!(),
+        BinOp::BitAnd => unimplemented!(),
+        BinOp::BitXor => unimplemented!(),
+        BinOp::Lt => unimplemented!(),
+        BinOp::Le => unimplemented!(),
+        BinOp::Gt => unimplemented!(),
+        BinOp::Ge => unimplemented!(),
+        BinOp::Eq => unimplemented!(),
+        BinOp::Ne => unimplemented!(),
+    }
+}*/
 
 fn substitute_variable_with_expression(source_expression: &Expression, target: &Expression, replacement: &Expression) -> Expression {
     match *source_expression {
