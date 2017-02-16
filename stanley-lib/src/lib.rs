@@ -36,6 +36,7 @@ use syntax::ast::{MetaItemKind, NestedMetaItemKind, Attribute};
 use ast::{Expression, BinaryOperator, UnaryOperator, Types};
 use rustc_data_structures::indexed_vec::Idx;
 
+mod smt;
 mod ast;
 mod condition_parser;
 
