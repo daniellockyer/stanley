@@ -384,10 +384,8 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
                 UnOp::Not => UnaryOperator::Not,
                 UnOp::Neg => UnaryOperator::Negation,
             };
-
             expression.push(Expression::UnaryExpression(op, Box::new(gen_expression(val, data))));
         },
-        Rvalue::Use(ref operand) => { expression.push(gen_expression(operand, data)); },
         Rvalue::Aggregate(ref ag_kind, ref vec_operand) => match *ag_kind {
             AggregateKind::Tuple => {
                 for operand in vec_operand.iter() {
@@ -396,6 +394,7 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
             },
             _ => error!("Unsupported aggregate: only tuples are supported")
         },
+        Rvalue::Use(ref operand) => { expression.push(gen_expression(operand, data)); },
         Rvalue::Cast(..) | Rvalue::Ref(..) => { expression.push(var.clone()); },
         Rvalue::Box(..) | Rvalue::Len(..) | _ => unimplemented!()
     };
