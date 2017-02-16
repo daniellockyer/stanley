@@ -217,11 +217,11 @@ fn gen(index: usize, data: &MirData, post_expression: &Expression) -> Expression
             },
             Operand::Consume (..) => unimplemented!()
         },
-        TerminatorKind::If{cond, targets} => {
-            let wp_if = gen(targets.0.index(), data, post_expression);
-            let wp_else = gen(targets.1.index(), data, post_expression);
+        TerminatorKind::SwitchInt{discr, targets, ..} => {
+            let wp_if = gen(targets[1].index(), data, post_expression);
+            let wp_else = gen(targets[0].index(), data, post_expression);
 
-            let condition = match cond {
+            let condition = match discr {
                 Operand::Constant (ref constant) => match constant.literal {
                     Literal::Value {ref value} => match *value {
                         ConstVal::Bool (ref boolean) => Expression::BooleanLiteral(*boolean),
@@ -241,7 +241,7 @@ fn gen(index: usize, data: &MirData, post_expression: &Expression) -> Expression
             );
         },
         TerminatorKind::DropAndReplace{..} | TerminatorKind::Drop{..} | TerminatorKind::Unreachable |
-            TerminatorKind::Resume | TerminatorKind::Switch{..} | TerminatorKind::SwitchInt{..} => unimplemented!(),
+            TerminatorKind::Resume => unimplemented!(),
     }
 
     let mut stmts = data.block_data[index].statements.clone();
