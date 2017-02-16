@@ -53,7 +53,6 @@ impl <'tcx> Pass for StanleyMir {}
 impl <'tcx> MirPass<'tcx> for StanleyMir {
     fn run_pass<'a>(&mut self, tcx: TyCtxt<'a, 'tcx, 'tcx>, src: MirSource, mir: &mut Mir<'tcx>) {
         let item_id = src.item_id();
-
         let def_id = tcx.hir.local_def_id(item_id);
         let name = tcx.item_path_str(def_id);
         let attrs = tcx.hir.attrs(item_id);
@@ -77,9 +76,6 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             data.block_data.push(block);
         }
 
-        //println!("{:#?}", pre_string_expression);
-        //println!("{:#?}", post_string_expression);
-
         pre_string_expression = walk_and_replace(pre_string_expression, &data);
         post_string_expression = walk_and_replace(post_string_expression, &data);
 
@@ -93,14 +89,12 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
 
         let weakest_precondition = gen(0, &data, &post_string_expression);
 
-        // Create the verification condition, P -> WP
         let verification_condition = Expression::BinaryExpression(
             Box::new(pre_string_expression.clone()),
             ast::BinaryOperator::Implication,
             Box::new(weakest_precondition.clone())
         );
 
-        // Check that the verification condition is correctly typed
         ast::ty_check(&verification_condition).unwrap_or_else(|e| error!("{}", e));
 
         smt::run_solver(&verification_condition);
@@ -248,26 +242,11 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
             let rvalue = gen_expression(rval, data);
 
             let op: BinaryOperator = match *binop {
-                BinOp::Add => {
-                    //wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
-                    BinaryOperator::Addition
-                },
-                BinOp::Sub => {
-                    //wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
-                    BinaryOperator::Subtraction
-                },
-                BinOp::Mul => {
-                    //wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
-                    BinaryOperator::Multiplication
-                },
-                BinOp::Div => {
-                    //wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
-                    BinaryOperator::Division
-                },
-                BinOp::Rem => {
-                    //wp = overflow_check(&wp, &var, binop, &lvalue, &rvalue);
-                    BinaryOperator::Modulo
-                },
+                BinOp::Add => BinaryOperator::Addition,
+                BinOp::Sub => BinaryOperator::Subtraction,
+                BinOp::Mul => BinaryOperator::Multiplication,
+                BinOp::Div => BinaryOperator::Division,
+                BinOp::Rem => BinaryOperator::Modulo,
                 BinOp::BitOr => BinaryOperator::BitwiseOr,
                 BinOp::BitAnd => BinaryOperator::BitwiseAnd,
                 BinOp::BitXor => BinaryOperator::BitwiseXor,
@@ -309,45 +288,6 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
 
     wp
 }
-/*
-fn overflow_check(wp: &Expression, var: &Expression, binop: &BinOp, lvalue: &Expression, rvalue: &Expression) -> Expression {
-    match var {
-        Expression::VariableMapping(name, ty) => Expression::BinaryExpression(Box::new(wp.clone()), BinaryOperator::And, Box::new(
-            match var.var_type {
-                Types::I8 => signed_overflow(binop, 8u8, lvalue, rvalue),
-                Types::I16 => signed_overflow(binop, 16u8, lvalue, rvalue),
-                Types::I32 => signed_overflow(binop, 32u8, lvalue, rvalue),
-                Types::I64 => signed_overflow(binop, 64u8, lvalue, rvalue),
-                Types::U8 | Types::U16 | Types::U32 | Types::U64 => {
-                    unsigned_overflow(binop, lvalue, rvalue)
-                },
-                _ => panic!("Unsupported return type of binary operation: {}", var.var_type),
-            }
-        )),
-        _ => unimplemented!()
-    }
-}
-
-fn signed_overflow(binop: &BinOp, size: u8, lvalue: &Expression, rvalue: &Expression) -> Expression {
-    match *binop {
-        BinOp::Add => signed_add(size, lvalue, rvalue),
-        BinOp::Mul => signed_mul(lvalue, rvalue),
-        BinOp::Sub => signed_sub(size, lvalue, rvalue),
-        BinOp::Div => signed_div(size, lvalue, rvalue),
-        BinOp::Rem => signed_div(size, lvalue, rvalue),
-        BinOp::Shl => unimplemented!(),
-        BinOp::Shr => unimplemented!(),
-        BinOp::BitOr => unimplemented!(),
-        BinOp::BitAnd => unimplemented!(),
-        BinOp::BitXor => unimplemented!(),
-        BinOp::Lt => unimplemented!(),
-        BinOp::Le => unimplemented!(),
-        BinOp::Gt => unimplemented!(),
-        BinOp::Ge => unimplemented!(),
-        BinOp::Eq => unimplemented!(),
-        BinOp::Ne => unimplemented!(),
-    }
-}*/
 
 fn substitute_variable_with_expression(source_expression: &Expression, target: &Expression, replacement: &Expression) -> Expression {
     match *source_expression {
@@ -447,8 +387,7 @@ fn gen_expression(operand: &Operand, data: &MirData) -> Expression {
                 },
                 _ => unimplemented!()
             },
-            Literal::Item {..} => unimplemented!(),
-            Literal::Promoted {..} => unimplemented!(),
+            Literal::Item {..} | Literal::Promoted {..} => unimplemented!(),
         }
     }
 }
