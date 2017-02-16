@@ -3,10 +3,22 @@
 
 #![feature(plugin_registrar, rustc_private)]
 
+#[macro_export]
+macro_rules! error {
+    ($($args:tt)*) => {{
+        use std::io::Write;
+        let stderr = ::std::io::stderr();
+        let mut stderr = stderr.lock();
+        write!(stderr, "\n[!] Error:\n").unwrap();
+        writeln!(stderr, $($args)*).unwrap();
+        write!(stderr, "\n\n").unwrap();
+        ::std::process::exit(1)
+    }}
+}
+
 #[macro_use] extern crate rustproof_libsmt;
 extern crate petgraph;
 extern crate syntax;
-
 extern crate rustc;
 extern crate rustc_plugin;
 extern crate rustc_trans;
@@ -23,20 +35,6 @@ use syntax::feature_gate::AttributeType;
 use syntax::ast::{MetaItemKind, NestedMetaItemKind, Attribute};
 use ast::{Expression, BinaryOperator, UnaryOperator, Types};
 use rustc_data_structures::indexed_vec::Idx;
-
-
-#[macro_export]
-macro_rules! error {
-    ($($args:tt)*) => {{
-        use std::io::Write;
-        let stderr = ::std::io::stderr();
-        let mut stderr = stderr.lock();
-        write!(stderr, "\n[!] Error:\n").unwrap();
-        writeln!(stderr, $($args)*).unwrap();
-        write!(stderr, "\n\n").unwrap();
-        ::std::process::exit(1)
-    }}
-}
 
 mod ast;
 mod condition_parser;
