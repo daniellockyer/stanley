@@ -50,17 +50,15 @@ pub enum UnaryOperator {
 
 #[derive(Clone, PartialEq, Copy)]
 pub enum Types {
-    Bool,
     I8,
     I16,
     I32,
     I64,
-    /*I128,*/
     U8,
     U16,
     U32,
     U64,
-    /*U128,*/
+    Bool,
     Void,
     Unknown
 }
@@ -73,16 +71,14 @@ pub fn type_to_enum(x: Ty) -> Types {
             I16 => Types::I16,
             I32 => Types::I32,
             I64 => Types::I64,
-            /*I128 => Types::I128,*/
-            _ => unreachable!() //TODO: Is
+            _ => unreachable!()
         },
         TyUint(a) => match a {
             U8 => Types::U8,
             U16 => Types::U16,
             U32 => Types::U32,
             U64 => Types::U64,
-            /*U128 => Types::U128,*/
-            _ => unreachable!() //TODO: Us
+            _ => unreachable!()
         },
         _ => Types::Unknown
     }
@@ -153,8 +149,8 @@ impl Debug for BinaryOperator {
 impl Debug for UnaryOperator {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
         match *self {
-            UnaryOperator::Negation => { write!(fmt, "-") },
-            UnaryOperator::Not => { write!(fmt, "NOT") }
+            UnaryOperator::Negation => write!(fmt, "-"),
+            UnaryOperator::Not => write!(fmt, "NOT")
         }
     }
 }
@@ -162,19 +158,17 @@ impl Debug for UnaryOperator {
 impl Debug for Types {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
         match *self {
-            Types::Bool => { write!(fmt, "bool") },
-            Types::I8 => { write!(fmt, "i8") },
-            Types::I16 => { write!(fmt, "i16") },
-            Types::I32 => { write!(fmt, "i32") },
-            Types::I64 => { write!(fmt, "i64") },
-            /*Types::I128 => { write!(fmt, "i128") },*/
-            Types::U8 => { write!(fmt, "u8") },
-            Types::U16 => { write!(fmt, "u16") },
-            Types::U32 => { write!(fmt, "u32") },
-            Types::U64 => { write!(fmt, "u64") },
-            /*Types::U128 => { write!(fmt, "u128") },*/
-            Types::Void => { write!(fmt, "()") },
-            Types::Unknown => { write!(fmt, "?") }
+            Types::Bool => write!(fmt, "bool"),
+            Types::I8 => write!(fmt, "i8"),
+            Types::I16 => write!(fmt, "i16"),
+            Types::I32 => write!(fmt, "i32"),
+            Types::I64 => write!(fmt, "i64"),
+            Types::U8 => write!(fmt, "u8"),
+            Types::U16 => write!(fmt, "u16"),
+            Types::U32 => write!(fmt, "u32"),
+            Types::U64 => write!(fmt, "u64"),
+            Types::Void => write!(fmt, "()"),
+            Types::Unknown => write!(fmt, "?")
         }
     }
 }
@@ -185,44 +179,22 @@ pub fn determine_evaluation_type(expression: &Expression) -> Types {
             match *expression {
                 Expression::BinaryExpression(ref l, ref op, _) => {
                     match *op {
-                        BinaryOperator::Addition
-                        | BinaryOperator::Subtraction
-                        | BinaryOperator::Multiplication
-                        | BinaryOperator::Division
-                        | BinaryOperator::Modulo
-                        | BinaryOperator::BitwiseLeftShift
-                        | BinaryOperator::BitwiseRightShift
-                        | BinaryOperator::BitwiseOr
-                        | BinaryOperator::BitwiseAnd
+                        BinaryOperator::Addition | BinaryOperator::Subtraction | BinaryOperator::Multiplication
+                        | BinaryOperator::Division | BinaryOperator::Modulo | BinaryOperator::BitwiseLeftShift
+                        | BinaryOperator::BitwiseRightShift | BinaryOperator::BitwiseOr | BinaryOperator::BitwiseAnd
                         | BinaryOperator::BitwiseXor => determine_evaluation_type(l),
-                        BinaryOperator::LessThan
-                        | BinaryOperator::LessThanOrEqual
-                        | BinaryOperator::GreaterThan
-                        | BinaryOperator::GreaterThanOrEqual
-                        | BinaryOperator::Equal
-                        | BinaryOperator::NotEqual
-                        | BinaryOperator::And
-                        | BinaryOperator::Or
-                        | BinaryOperator::Xor
-                        | BinaryOperator::Implication
-                        | BinaryOperator::BiImplication => Types::Bool,
+                        BinaryOperator::LessThan | BinaryOperator::LessThanOrEqual | BinaryOperator::GreaterThan 
+                        | BinaryOperator::GreaterThanOrEqual | BinaryOperator::Equal | BinaryOperator::NotEqual
+                        | BinaryOperator::And | BinaryOperator::Or | BinaryOperator::Xor
+                        | BinaryOperator::Implication | BinaryOperator::BiImplication => Types::Bool,
                     }
                 },
                 Expression::UnaryExpression(_, ref expr) => determine_evaluation_type(expr),
                 Expression::VariableMapping(_, ref ty) => *ty,
                 Expression::BooleanLiteral(_) => Types::Bool,
                 Expression::BitVector(_, ref ty) => match *ty {
-                    Types::U8 => Types::U8,
-                    Types::U16 => Types::U16,
-                    Types::U32 => Types::U32,
-                    Types::U64 => Types::U64,
-                    /*Types::U128 => Types::U128,*/
-                    Types::I8 => Types::I8,
-                    Types::I16 => Types::I16,
-                    Types::I32 => Types::I32,
-                    Types::I64 => Types::I64,
-                    /*Types::I128 => Types::I128,*/
-                    _ => error!("Invalid or Unsupported integer type: \"{:?}\"", ty)
+                    Types::Bool | Types::Void | Types::Unknown => error!("Invalid or Unsupported integer type: \"{:?}\"", ty),
+                    _ => *ty
                 }
             }
         },
@@ -232,14 +204,14 @@ pub fn determine_evaluation_type(expression: &Expression) -> Types {
 
 pub fn same_signedness(type1: Types, type2: Types) -> bool {
     match type1 {
-        Types::U8 | Types::U16 | Types::U32 | Types::U64 /*| Types::U128 */ => match type2 {
-            Types::U8 | Types::U16 | Types::U32 | Types::U64 /*| Types::U128*/ => true,
-            Types::I8 | Types::I16 | Types::I32 | Types::I64 /*| Types::I128*/ => false,
+        Types::U8 | Types::U16 | Types::U32 | Types::U64 => match type2 {
+            Types::U8 | Types::U16 | Types::U32 | Types::U64 => true,
+            Types::I8 | Types::I16 | Types::I32 | Types::I64 => false,
             _ => error!("Cannot find numeric signedness of `{:?}`", type2)
         },
-        Types::I8 | Types::I16 | Types::I32 | Types::I64 /*| Types::I128 */ => match type2 {
-            Types::U8 | Types::U16 | Types::U32 | Types::U64 /*| Types::U128*/ => false,
-            Types::I8 | Types::I16 | Types::I32 | Types::I64 /*| Types::I128*/ => true,
+        Types::I8 | Types::I16 | Types::I32 | Types::I64 => match type2 {
+            Types::U8 | Types::U16 | Types::U32 | Types::U64 => false,
+            Types::I8 | Types::I16 | Types::I32 | Types::I64 => true,
             _ => error!("Cannot find numeric signedness of `{:?}`", type2)
         },
         _ => error!("Cannot find numeric signedness of `{:?}`", type1)
@@ -269,7 +241,7 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
             }
         },
         Expression::BitVector(_, ref ty) => match *ty {
-            Types::U8 | Types::U16 | Types::U32 | Types::U64 /*| Types::U128*/ | Types::I8 | Types::I16 | Types::I32 | Types::I64 /*| Types::I128*/ => Ok(true),
+            Types::U8 | Types::U16 | Types::U32 | Types::U64 | Types::I8 | Types::I16 | Types::I32 | Types::I64 => Ok(true),
             _ => Err(format!("Invalid or unsupported integer type: \"{:?}\"", ty))
         },
         Expression::BinaryExpression(ref l, ref op, ref r) => {
