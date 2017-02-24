@@ -2,25 +2,34 @@ use rustproof_libsmt::backends::smtlib2::*;
 use rustproof_libsmt::backends::backend::*;
 use rustproof_libsmt::backends::z3;
 use rustproof_libsmt::theories::{bitvec, core};
-use rustproof_libsmt::logics::qf_abv::*;
+use rustproof_libsmt::logics::qf_aufbv::*;
 use petgraph::graph::NodeIndex;
 use ast::{Expression, BinaryOperator, UnaryOperator, Types};
 
 use std::fmt::Debug;
+use regex::Regex;
 
-pub fn run_solver(verification_condition: &Expression) {
-	let mut z3: z3::Z3 = Default::default();
-	let mut solver = SMTLib2::new(Some(QF_ABV));
-	let vcon = solver.expr2smtlib(verification_condition);
-	let _ = solver.assert(core::OpCodes::Not, &[vcon]);
-	let (_, check) = solver.solve(&mut z3, false);
+pub fn run_solver(verification_condition: &Expression, name: &String) {
+    let mut z3: z3::Z3 = Default::default();
+    let mut solver = SMTLib2::new(Some(QF_AUFBV));
+    let vcon = solver.expr2smtlib(verification_condition);
+    let _ = solver.assert(core::OpCodes::Not, &[vcon]);
+    let (_, check) = solver.solve(&mut z3, false);
 
-	match check {
-	    SMTRes::Sat(_, ref model) => println!("Verification Condition is not valid.\n\n{}", model.clone().unwrap()),
-	    SMTRes::Unsat(..) => println!("Verification Condition is valid."),
-	    SMTRes::Error(ref error, _) => println!("Error in Verification Condition Generation.\n{}\n", error)
-	}
+    match check {
+        SMTRes::Sat(_, ref model) => {
+            let re = Regex::new(r".+(\(define-fun\s+([a-zA-Z0-9]+).*\s+#x([0-9a-f]+)\))+").unwrap();
+            let text = model.clone().unwrap();
 
+            println!("[INVALID] -- {}", name);
+
+            for cap in re.captures_iter(&text) {
+                println!("   {:7} = {:10?} (0x{})", &cap[2], i64::from_str_radix(&cap[3], 16).unwrap(), &cap[3]);
+            }
+        },
+        SMTRes::Unsat(..) => println!("[VALID] -- {}", name),
+        SMTRes::Error(ref error, _) => println!("[ERROR]\n{}\n", error)
+    }
 }
 
 pub trait Pred2SMT {
@@ -30,9 +39,9 @@ pub trait Pred2SMT {
     fn expr2smtlib (&mut self, &Expression) -> Self::Idx;
 }
 
-impl Pred2SMT for SMTLib2<QF_ABV> {
+impl Pred2SMT for SMTLib2<QF_AUFBV> {
     type Idx = NodeIndex;
-    type Logic = QF_ABV;
+    type Logic = QF_AUFBV;
 
     fn expr2smtlib (&mut self, vc: &Expression) -> Self::Idx {
         match *vc {
@@ -76,13 +85,15 @@ impl Pred2SMT for SMTLib2<QF_ABV> {
             Expression::VariableMapping (ref v, ref ty) => {
                 let sort = match *ty {
                     Types::Bool => bitvec::Sorts::Bool,
-                    Types::I8 | Types::U8 => bitvec::Sorts::BitVector(8),
-                    Types::I16 | Types::U16 => bitvec::Sorts::BitVector(16),
-                    Types::I32 | Types::U32 => bitvec::Sorts::BitVector(32),
-                    Types::I64 | Types::U64 => bitvec::Sorts::BitVector(64),
-                    Types::Void | Types::Unknown => unreachable!(),
+                    Types::Void | Types::Unknown => unimplemented!(),
+                    _ => bitvec::Sorts::BitVector(bitvector_size(*ty))
                 };
-                return self.new_var(Some(&v), sort);
+
+                if self.contains_mapping(&v) {
+                    return self.get_by_name(&v);
+                }
+
+                self.new_var(Some(&v), sort)
             },
             Expression::BooleanLiteral (ref b) => self.new_const(core::OpCodes::Const(*b)),
             Expression::BitVector (ref value, ref size) => bv_const!(self, *value as u64, bitvector_size(*size))
@@ -98,4 +109,85 @@ fn bitvector_size(ty: Types) -> usize {
         Types::I64 | Types::U64 => 64,
         _ => unreachable!()
     }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+use rustc::mir::*;
+
+pub fn overflow_check(wp: &Expression, var: &Expression, binop: &BinOp, lvalue: &Expression, rvalue: &Expression) -> Expression {
+    Expression::BinaryExpression(
+        Box::new(wp.clone()),
+        BinaryOperator::And,
+        Box::new(
+            match *var {
+                Expression::VariableMapping(_, ref size) => match *size {
+                    Types::I8 | Types::I16 | Types::I32 | Types::I64 => match *binop {
+                        BinOp::Add => signed_add(*size, lvalue, rvalue),
+                        _ => unimplemented!()
+                    },
+                    Types::U8 | Types::U16 | Types::U32 | Types::U64 => match *binop {
+                        BinOp::Add => Expression::BinaryExpression(
+                            Box::new(Expression::BinaryExpression(Box::new(lvalue.clone()), BinaryOperator::Addition, Box::new(rvalue.clone()))),
+                            BinaryOperator::GreaterThanOrEqual,
+                            Box::new(rvalue.clone())
+                        ),
+                        _ => unimplemented!()
+                    },
+                    _ => panic!("Unsupported return type of binary operation: {:?}", *size),
+                },
+                _ => unimplemented!()
+            }
+        )
+    )
+}
+
+macro_rules! construct_bv {($val:expr, $size:expr) => (Box::new(Expression::BitVector($val, $size)))}
+
+macro_rules! construct_be {($left:expr, $op:expr, $right:expr) => (Box::new(Expression::BinaryExpression($left, $op, $right)))}
+
+macro_rules! form_expression {
+    ($lt:expr, $lb:expr, $exprsign:path, $sign:path, $right:expr) => {{
+        construct_be!(construct_be!(Box::new($lt), $exprsign, $right), $sign, construct_be!(Box::new($lb), $exprsign, $right))
+    }};
+}
+
+fn signed_add(size: Types, lvalue: &Expression, rvalue: &Expression) -> Expression {
+    Expression::BinaryExpression(
+        construct_be!(
+            form_expression!(lvalue.clone(), rvalue.clone(), BinaryOperator::GreaterThanOrEqual, BinaryOperator::And, construct_bv!(0i64, size)),
+            BinaryOperator::Implication,
+            construct_be!(
+                construct_be!(Box::new(lvalue.clone()), BinaryOperator::Addition, Box::new(rvalue.clone())),
+                BinaryOperator::GreaterThanOrEqual,
+                construct_bv!(0i64, size)
+            )
+        ),
+        BinaryOperator::And,
+        construct_be!(
+            form_expression!(lvalue.clone(), rvalue.clone(), BinaryOperator::LessThan, BinaryOperator::Or, construct_bv!(0i64, size)),
+            BinaryOperator::Implication,
+            construct_be!(
+                form_expression!(lvalue.clone(), rvalue.clone(), BinaryOperator::LessThan, BinaryOperator::And, construct_bv!(0i64, size)),
+                BinaryOperator::Implication,
+                construct_be!(
+                    construct_be!(Box::new(lvalue.clone()), BinaryOperator::Addition, Box::new(rvalue.clone())),
+                    BinaryOperator::LessThan,
+                    construct_bv!(0i64, size)
+                )
+            )
+        )
+    )
 }

@@ -18,6 +18,7 @@ macro_rules! error {
 
 #[macro_use] extern crate rustproof_libsmt;
 extern crate petgraph;
+extern crate regex;
 extern crate syntax;
 extern crate rustc;
 extern crate rustc_plugin;
@@ -79,13 +80,8 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         pre_string_expression = walk_and_replace(pre_string_expression, &data);
         post_string_expression = walk_and_replace(post_string_expression, &data);
 
-        //println!("{:#?}", pre_string_expression);
-        //println!("{:#?}", post_string_expression);
-
         ast::ty_check(&pre_string_expression).unwrap_or_else(|e| error!("{}", e));
         ast::ty_check(&post_string_expression).unwrap_or_else(|e| error!("{}", e));
-
-        print!("----- {} -- ", name);
 
         let weakest_precondition = gen(0, &data, &post_string_expression);
 
@@ -97,7 +93,7 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
 
         ast::ty_check(&verification_condition).unwrap_or_else(|e| error!("{}", e));
 
-        smt::run_solver(&verification_condition);
+        smt::run_solver(&verification_condition, &name);
     }
 }
 
@@ -123,7 +119,7 @@ fn gen(index: usize, data: &MirData, post_expression: &Expression) -> Expression
                 Operand::Constant (ref constant) => match constant.literal {
                     Literal::Value {ref value} => match *value {
                         ConstVal::Bool (ref boolean) => Expression::BooleanLiteral(*boolean),
-                        _ => unreachable!()
+                        _ => unimplemented!()
                     },
                     _ => unimplemented!()
                 },
@@ -154,68 +150,63 @@ fn gen(index: usize, data: &MirData, post_expression: &Expression) -> Expression
 
 fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
     match lvalue {
-        Lvalue::Local(index) => {
-            match data.mir.local_kind(index) {
-                LocalKind::Arg => Expression::VariableMapping(data.mir.local_decls[index].name.unwrap().as_str().to_string(), ast::string_to_type(data.mir.local_decls[index].ty.clone().to_string())),
-                LocalKind::Temp => {
-                    let mut ty = data.mir.local_decls[index].ty.clone().to_string();
-                    
-                    if let TypeVariants::TyTuple(s, _) = data.mir.local_decls[index].ty.sty {
-                        if s.len() > 0 {
-                            ty = s[0].to_string();
-                        }
+        Lvalue::Local(index) => match data.mir.local_kind(index) {
+            LocalKind::Arg => Expression::VariableMapping(data.mir.local_decls[index].name.unwrap().as_str().to_string(), ast::string_to_type(data.mir.local_decls[index].ty.to_string())),
+            LocalKind::Temp => {
+                let mut ty = data.mir.local_decls[index].ty.to_string();
+
+                if let TypeVariants::TyTuple(s, _) = data.mir.local_decls[index].ty.sty {
+                    if s.len() > 0 {
+                        ty = s[0].to_string();
                     }
-                    Expression::VariableMapping("tmp".to_string() + index.index().to_string().as_str(), ast::string_to_type(ty))
-                },
-                LocalKind::Var => Expression::VariableMapping("var".to_string() + index.index().to_string().as_str(), ast::string_to_type(data.mir.local_decls[index].ty.clone().to_string())),
-                LocalKind::ReturnPointer => Expression::VariableMapping("ret".to_string(), ast::type_to_enum(data.func_return_type.clone())),
-            }
+                }
+                Expression::VariableMapping("tmp".to_string() + index.index().to_string().as_str(), ast::string_to_type(ty))
+            },
+            LocalKind::Var => Expression::VariableMapping("var".to_string() + index.index().to_string().as_str(), ast::string_to_type(data.mir.local_decls[index].ty.to_string())),
+            LocalKind::ReturnPointer => Expression::VariableMapping("ret".to_string(), ast::type_to_enum(data.func_return_type)),
         },
         Lvalue::Projection(pro) => {
-            let index2: String = match pro.as_ref().elem.clone() {
-                ProjectionElem::Field(ref field, _) => (field.index() as i32).to_string(),
-                ProjectionElem::Index(_) | _ => unimplemented!(),
-            };
-
             let lvalue_name;
             let lvalue_type_string;
 
             match pro.as_ref().base {
-                Lvalue::Local(variable) => {
-                    match data.mir.local_kind(variable) {
-                        LocalKind::Arg => {
-                            lvalue_name = data.mir.local_decls[variable].name.unwrap().as_str().to_string();
-                            lvalue_type_string = data.mir.local_decls[variable].ty.clone().to_string();
-                        },
-                        LocalKind::Temp => {
-                            lvalue_name = "tmp".to_string() + variable.index().to_string().as_str();
+                Lvalue::Local(variable) => match data.mir.local_kind(variable) {
+                    LocalKind::Arg => {
+                        lvalue_name = data.mir.local_decls[variable].name.unwrap().as_str().to_string();
+                        lvalue_type_string = data.mir.local_decls[variable].ty.to_string();
+                    },
+                    LocalKind::Temp => {
+                        lvalue_name = "tmp".to_string() + variable.index().to_string().as_str();
 
-                            match data.mir.local_decls[variable].ty.sty {
-                                TypeVariants::TyTuple(s, _) => lvalue_type_string = s[0].to_string(),
-                                _ => unimplemented!(),
-                            }
-                        },
-                        LocalKind::Var => {
-                            let i = index2.parse::<usize>().unwrap();
-                            lvalue_name = "var".to_string() + variable.index().to_string().as_str();
+                        match data.mir.local_decls[variable].ty.sty {
+                            TypeVariants::TyTuple(s, _) => lvalue_type_string = s[0].to_string(),
+                            _ => unimplemented!()
+                        }
+                    },
+                    LocalKind::Var => {
+                        lvalue_name = "var".to_string() + variable.index().to_string().as_str();
 
-                            match data.mir.local_decls[variable].ty.sty {
-                                TypeVariants::TyTuple(s, _) => lvalue_type_string = s[i].to_string(),
-                                _ => unimplemented!(),
-                            }
-                        },
-                        LocalKind::ReturnPointer => unimplemented!()
-                    }
+                        let i = match pro.as_ref().elem.clone() {
+                            ProjectionElem::Field(ref field, _) => (field.index() as i32).to_string(),
+                            _ => unimplemented!()
+                        }.parse::<usize>().unwrap();
+
+                        match data.mir.local_decls[variable].ty.sty {
+                            TypeVariants::TyTuple(s, _) => lvalue_type_string = s[i].to_string(),
+                            _ => unimplemented!()
+                        }
+                    },
+                    LocalKind::ReturnPointer => unimplemented!()
                 },
-                Lvalue::Static(_) | Lvalue::Projection(_) => unimplemented!()
+                _ => unimplemented!()
             };
 
-            let index3: String = match pro.as_ref().elem.clone() {
+            let index3 = match pro.as_ref().elem.clone() {
                 ProjectionElem::Field(ref field, _) => (field.index() as i32).to_string(),
-                ProjectionElem::Index(_) | _ => unimplemented!(),
+                _ => unimplemented!()
             };
 
-            Expression::VariableMapping(lvalue_name + "." + index3.as_str(), ast::string_to_type(lvalue_type_string))
+            Expression::VariableMapping(lvalue_name + index3.as_str(), ast::string_to_type(lvalue_type_string))
         },
         Lvalue::Static(_) => unimplemented!()
     }
@@ -236,13 +227,16 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
     let var = gen_lvalue(lvalue, data);
     let mut expression = Vec::new();
 
-    match rvalue.clone() {
+    match rvalue {
         Rvalue::CheckedBinaryOp(ref binop, ref lval, ref rval) | Rvalue::BinaryOp(ref binop, ref lval, ref rval) => {
             let lvalue = gen_expression(lval, data);
             let rvalue = gen_expression(rval, data);
 
             let op: BinaryOperator = match *binop {
-                BinOp::Add => BinaryOperator::Addition,
+                BinOp::Add => {
+                    wp = smt::overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    BinaryOperator::Addition
+                },
                 BinOp::Sub => BinaryOperator::Subtraction,
                 BinOp::Mul => BinaryOperator::Multiplication,
                 BinOp::Div => BinaryOperator::Division,
@@ -263,11 +257,10 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
             expression.push(Expression::BinaryExpression(Box::new(lvalue), op, Box::new(rvalue)));
         },
         Rvalue::UnaryOp(ref unop, ref val) => {
-            let op = match *unop {
+            expression.push(Expression::UnaryExpression(match *unop {
                 UnOp::Not => UnaryOperator::Not,
                 UnOp::Neg => UnaryOperator::Negation,
-            };
-            expression.push(Expression::UnaryExpression(op, Box::new(gen_expression(val, data))));
+            }, Box::new(gen_expression(val, data))));
         },
         Rvalue::Aggregate(ref ag_kind, ref vec_operand) => match *ag_kind {
             AggregateKind::Tuple => {
@@ -277,9 +270,9 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
             },
             _ => error!("Unsupported aggregate: only tuples are supported")
         },
-        Rvalue::Use(ref operand) => { expression.push(gen_expression(operand, data)); },
-        Rvalue::Cast(..) | Rvalue::Ref(..) => { expression.push(var.clone()); },
-        Rvalue::Box(..) | Rvalue::Len(..) | _ => unimplemented!()
+        Rvalue::Use(ref operand) => expression.push(gen_expression(operand, data)),
+        Rvalue::Cast(..) | Rvalue::Ref(..) => expression.push(var.clone()),
+        Rvalue::Box(..) | Rvalue::Len(..) | Rvalue::Repeat(..) | Rvalue::Discriminant(..) => unimplemented!()
     };
 
     for expr in &expression {
@@ -305,32 +298,24 @@ fn substitute_variable_with_expression(source_expression: &Expression, target: &
 }
 
 fn gen_ty(operand: &Operand, data: &MirData) -> Types {
-    let type_string = match operand.clone() {
+    ast::string_to_type(match operand.clone() {
         Operand::Constant(ref constant) => constant.ty.to_string(),
-        Operand::Consume(ref lvalue) => {
-            match *lvalue {
-                Lvalue::Local(ref variable) => {
-                    match data.mir.local_kind(*variable) {
-                        LocalKind::Arg | LocalKind::Temp | LocalKind::Var => data.mir.local_decls[*variable].ty.to_string(),
-                        _ => unimplemented!()
-                    }
-                },
-                Lvalue::Static(_) | Lvalue::Projection(_) => unimplemented!()
-            }
+        Operand::Consume(ref lvalue) => match *lvalue {
+            Lvalue::Local(ref variable) => match data.mir.local_kind(*variable) {
+                LocalKind::Arg | LocalKind::Temp | LocalKind::Var => data.mir.local_decls[*variable].ty.to_string(),
+                _ => unimplemented!()
+            },
+            Lvalue::Static(_) | Lvalue::Projection(_) => unimplemented!()
         }
-    };
-
-    ast::string_to_type(type_string)
+    })
 }
 
 fn get_argument_type(name: String, data: &MirData) -> Types {
     for arg in data.mir.args_iter() {
-        let ref arg2 = data.mir.local_decls[arg];
-
+        let arg2 = &data.mir.local_decls[arg];
         let a = arg2.name.unwrap().as_str();
-        let arg_name = String::from_utf8_lossy(a.as_bytes());
 
-        if name == arg_name {
+        if name == String::from_utf8_lossy(a.as_bytes()) {
             return ast::type_to_enum(arg2.ty)
         }
     }
@@ -341,7 +326,7 @@ fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
     match expression {
         Expression::VariableMapping(a, b) => {
             let aa = a.clone();
-            let mut bb = b.clone();
+            let mut bb = b;
 
             if bb == Types::Unknown {
                 if aa == "ret" {
@@ -355,12 +340,11 @@ fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
         },
         Expression::BinaryExpression(a, b, c) => {
             let aa = walk_and_replace(*a.clone(), data);
-            let ba = b.clone();
             let ca = walk_and_replace(*c.clone(), data);
-            Expression::BinaryExpression(Box::new(aa), ba, Box::new(ca))
+            Expression::BinaryExpression(Box::new(aa), b, Box::new(ca))
         },
         Expression::UnaryExpression(a, b) => {
-            let aa = a.clone();
+            let aa = a;
             let ba = walk_and_replace(*b.clone(), data);
             Expression::UnaryExpression(aa, Box::new(ba))
         },
@@ -387,7 +371,7 @@ fn gen_expression(operand: &Operand, data: &MirData) -> Expression {
                 },
                 _ => unimplemented!()
             },
-            Literal::Item {..} | Literal::Promoted {..} => unimplemented!(),
+            _ => unimplemented!()
         }
     }
 }
@@ -424,7 +408,6 @@ fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
 
 #[plugin_registrar]
 pub fn plugin_registrar(reg: &mut Registry) {
-	let stanleymir = StanleyMir {};
     reg.register_attribute("condition".to_string(), AttributeType::Whitelisted);
-    reg.register_mir_pass(Box::new(stanleymir));
+    reg.register_mir_pass(Box::new(StanleyMir {}));
 }
