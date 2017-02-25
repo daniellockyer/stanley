@@ -102,9 +102,9 @@ fn bigger_than_input(x:i32, y:i32) -> bool {
     x > y
 }
 
-#[condition(pre="true", post="x > y")]
+#[condition(pre="true", post="x > (y / 2)")]
 fn weird_bigger_than_input_div_two(x:i32, y:i32) -> bool {
-    x > (y / 2)
+    x > y
 }
 
 /*#[condition(pre="true", post="ret == 10:i32")]
