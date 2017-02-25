@@ -85,17 +85,15 @@ impl Pred2SMT for SMTLib2<QF_AUFBV> {
                 }
             },
             Expression::VariableMapping (ref v, ref ty) => {
-                let sort = match *ty {
-                    Types::Bool => bitvec::Sorts::Bool,
-                    Types::Void | Types::Unknown => unimplemented!(),
-                    _ => bitvec::Sorts::BitVector(bitvector_size(*ty))
-                };
-
                 if self.contains_mapping(&v) {
                     return self.get_by_name(&v);
                 }
 
-                self.new_var(Some(&v), sort)
+                self.new_var(Some(&v), match *ty {
+                    Types::Bool => bitvec::Sorts::Bool,
+                    Types::Void | Types::Unknown => unimplemented!(),
+                    _ => bitvec::Sorts::BitVector(bitvector_size(*ty))
+                })
             },
             Expression::BooleanLiteral (ref b) => self.new_const(core::OpCodes::Const(*b)),
             Expression::BitVector (ref value, ref size) => bv_const!(self, *value as u64, bitvector_size(*size))

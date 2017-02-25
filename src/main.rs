@@ -1,7 +1,7 @@
 #![feature(plugin, custom_attribute)]
 #![plugin(stanlib)]
 #![allow(dead_code)]
-
+/*
 #[condition(pre="true", post="ret == (x + 1:i32)")]
 fn param_plus_one2(x: i32) -> i32 {
     x + 1
@@ -102,18 +102,25 @@ fn bigger_than_input(x:i32, y:i32) -> bool {
     x > y
 }
 
-#[condition(pre="true", post="x > (y / 2)")]
+#[condition(pre="true", post="x > (y / 2:i32)")]
 fn weird_bigger_than_input_div_two(x:i32, y:i32) -> bool {
     x > y
 }
-
-/*#[condition(pre="true", post="ret == 10:i32")]
+*/
+#[condition(pre="true", post="ret == 10:i32")]
 fn loopy(x: i32) -> i32 {
     while x < 5 {
     }
     10
 }
 
+#[condition(pre="true", post="ret == 10:i32")]
+fn loopy2(x: i32) -> i32 {
+    while x < 5 {
+    }
+    9
+}
+/*
 #[condition(pre="true", post="ret sorted(xs)")]
 fn selection(xs: &mut [u32]) {
     let (mut i, len) = (0, xs.len());
