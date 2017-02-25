@@ -6,6 +6,7 @@ use rustproof_libsmt::logics::qf_aufbv::*;
 use petgraph::graph::NodeIndex;
 use ast::{Expression, BinaryOperator, UnaryOperator, Types};
 
+use rustc::mir::*;
 use std::fmt::Debug;
 use regex::Regex;
 
@@ -55,6 +56,7 @@ impl Pred2SMT for SMTLib2<QF_AUFBV> {
                     BinaryOperator::Multiplication => self.assert(bitvec::OpCodes::BvMul, &[l,r]),
                     BinaryOperator::Division => self.assert(bitvec::OpCodes::BvSDiv, &[l,r]),
                     BinaryOperator::Modulo => self.assert(bitvec::OpCodes::BvSMod, &[l,r]),
+
                     BinaryOperator::BitwiseOr => self.assert(core::OpCodes::Or, &[l,r]),
                     BinaryOperator::BitwiseAnd => self.assert(core::OpCodes::And, &[l,r]),
                     BinaryOperator::BitwiseXor => self.assert(core::OpCodes::Xor, &[l,r]),
@@ -110,22 +112,6 @@ fn bitvector_size(ty: Types) -> usize {
         _ => unreachable!()
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-use rustc::mir::*;
 
 pub fn overflow_check(wp: &Expression, var: &Expression, binop: &BinOp, lvalue: &Expression, rvalue: &Expression) -> Expression {
     Expression::BinaryExpression(

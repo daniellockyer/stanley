@@ -109,11 +109,11 @@ impl PartialEq for BinaryOperator {
 impl Debug for Expression {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
         match *self {
-            Expression::BinaryExpression(ref l, op, ref r) => write!(fmt, "BiExp({:?} {:?} {:?})", l, op, r),
-            Expression::UnaryExpression(ref op, ref r) => write!(fmt, "UnExp({:?} {:?})", op, r),
-            Expression::VariableMapping (ref name, ref var_type) => write!(fmt, "VM({:?}:{:?})", name, var_type),
-            Expression::BitVector(ref val, ref s) => write!(fmt, "BV({:?}:{:?})", val, s),
-            Expression::BooleanLiteral(b) => write!(fmt, "B({:?})", b)
+            Expression::BinaryExpression(ref l, op, ref r) => write!(fmt, "({:?} {:?} {:?})", l, op, r),
+            Expression::UnaryExpression(ref op, ref r) => write!(fmt, "({:?} {:?})", op, r),
+            Expression::VariableMapping (ref name, ref var_type) => write!(fmt, "{}:{:?}", name, var_type),
+            Expression::BitVector(ref val, ref s) => write!(fmt, "{:?}:{:?}", val, s),
+            Expression::BooleanLiteral(b) => write!(fmt, "{:?}", b)
         }
     }
 }

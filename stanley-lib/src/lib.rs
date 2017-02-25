@@ -86,9 +86,9 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         let weakest_precondition = gen(0, &data, &post_string_expression);
 
         let verification_condition = Expression::BinaryExpression(
-            Box::new(pre_string_expression.clone()),
+            Box::new(weakest_precondition.clone()),
             ast::BinaryOperator::Implication,
-            Box::new(weakest_precondition.clone())
+            Box::new(pre_string_expression.clone()),
         );
 
         ast::ty_check(&verification_condition).unwrap_or_else(|e| error!("{}", e));
@@ -187,7 +187,7 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                         lvalue_name = "var".to_string() + variable.index().to_string().as_str();
 
                         let i = match pro.as_ref().elem.clone() {
-                            ProjectionElem::Field(ref field, _) => (field.index() as i32).to_string(),
+                            ProjectionElem::Field(ref field, _) => (field.index() as i64).to_string(),
                             _ => unimplemented!()
                         }.parse::<usize>().unwrap();
 
@@ -202,7 +202,7 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
             };
 
             let index3 = match pro.as_ref().elem.clone() {
-                ProjectionElem::Field(ref field, _) => (field.index() as i32).to_string(),
+                ProjectionElem::Field(ref field, _) => (field.index() as i64).to_string(),
                 _ => unimplemented!()
             };
 
@@ -234,7 +234,7 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
 
             let op: BinaryOperator = match *binop {
                 BinOp::Add => {
-                    wp = smt::overflow_check(&wp, &var, binop, &lvalue, &rvalue);
+                    //wp = smt::overflow_check(&wp, &var, binop, &lvalue, &rvalue);
                     BinaryOperator::Addition
                 },
                 BinOp::Sub => BinaryOperator::Subtraction,
