@@ -17,8 +17,7 @@ macro_rules! error {
 }
 
 macro_rules! gen_name {
-    ($start:expr, $index:expr, $depth:expr) =>
-        ($start.to_string() + $index.index().to_string().as_str() + $depth.to_string().as_str())
+    ($start:expr, $index:expr) => ($start.to_string() + $index.index().to_string().as_str())
 }
 
 #[macro_use] extern crate rustproof_libsmt;
@@ -127,7 +126,7 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
                     },
                     _ => unimplemented!()
                 },
-                Operand::Consume(c) => gen_lvalue(c, data, depth)
+                Operand::Consume(c) => gen_lvalue(c, data)
             };
 
             let not_condition = Expression::UnaryExpression(UnaryOperator::Not, Box::new(condition.clone()));
@@ -146,13 +145,13 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
     stmts.reverse();
 
     for stmt in stmts {
-        wp = gen_stmt(wp, stmt, data, depth);
+        wp = gen_stmt(wp, stmt, data);
     }
 
     wp
 }
 
-fn gen_lvalue(lvalue: Lvalue, data: &MirData, depth: usize) -> Expression {
+fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
     match lvalue {
         Lvalue::Local(index) => match data.mir.local_kind(index) {
             LocalKind::Arg => Expression::VariableMapping(data.mir.local_decls[index].name.unwrap().as_str().to_string(), ast::string_to_type(data.mir.local_decls[index].ty.to_string())),
@@ -164,9 +163,9 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData, depth: usize) -> Expression {
                         ty = s[0].to_string();
                     }
                 }
-                Expression::VariableMapping(gen_name!("tmp", index, depth), ast::string_to_type(ty))
+                Expression::VariableMapping(gen_name!("tmp", index), ast::string_to_type(ty))
             },
-            LocalKind::Var => Expression::VariableMapping(gen_name!("var", index, depth), ast::string_to_type(data.mir.local_decls[index].ty.to_string())),
+            LocalKind::Var => Expression::VariableMapping(gen_name!("var", index), ast::string_to_type(data.mir.local_decls[index].ty.to_string())),
             LocalKind::ReturnPointer => Expression::VariableMapping("ret".to_string(), ast::type_to_enum(data.func_return_type)),
         },
         Lvalue::Projection(pro) => {
@@ -180,7 +179,7 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData, depth: usize) -> Expression {
                         lvalue_type_string = data.mir.local_decls[variable].ty.to_string();
                     },
                     LocalKind::Temp => {
-                        lvalue_name = gen_name!("tmp", variable, depth);
+                        lvalue_name = gen_name!("tmp", variable);
 
                         match data.mir.local_decls[variable].ty.sty {
                             TypeVariants::TyTuple(s, _) => lvalue_type_string = s[0].to_string(),
@@ -188,7 +187,7 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData, depth: usize) -> Expression {
                         }
                     },
                     LocalKind::Var => {
-                        lvalue_name = gen_name!("var", variable, depth);
+                        lvalue_name = gen_name!("var", variable);
 
                         let i = match pro.as_ref().elem.clone() {
                             ProjectionElem::Field(ref field, _) => (field.index() as i64).to_string(),
@@ -211,7 +210,7 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData, depth: usize) -> Expression {
     }
 }
 
-fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData, depth: usize) -> Expression {
+fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData) -> Expression {
     let lvalue: Lvalue;
     let rvalue: Rvalue;
 
@@ -223,13 +222,13 @@ fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData, depth: usize) -> Ex
         _ => return wp
     }
 
-    let var = gen_lvalue(lvalue, data, depth);
+    let var = gen_lvalue(lvalue, data);
     let mut expression = Expression::VariableMapping("!!!!".to_string(), Types::Void);
 
     match rvalue {
         Rvalue::CheckedBinaryOp(ref binop, ref lval, ref rval) | Rvalue::BinaryOp(ref binop, ref lval, ref rval) => {
-            let lvalue2 = gen_expression(lval, data, depth);
-            let rvalue2 = gen_expression(rval, data, depth);
+            let lvalue2 = gen_expression(lval, data);
+            let rvalue2 = gen_expression(rval, data);
 
             expression = Expression::BinaryExpression(Box::new(lvalue2), (match *binop {
                 BinOp::Add => BinaryOperator::Addition,
@@ -254,7 +253,7 @@ fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData, depth: usize) -> Ex
             expression = Expression::UnaryExpression(match *unop {
                 UnOp::Not => UnaryOperator::Not,
                 UnOp::Neg => UnaryOperator::Negation,
-            }, Box::new(gen_expression(val, data, depth)));
+            }, Box::new(gen_expression(val, data)));
         },
         Rvalue::Aggregate(ref ag_kind, ref vec_operand) => match *ag_kind {
             AggregateKind::Tuple => {
@@ -273,7 +272,7 @@ fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData, depth: usize) -> Ex
             },
             _ => error!("Unsupported aggregate: only tuples are supported")
         },
-        Rvalue::Use(ref operand) => { expression = gen_expression(operand, data, depth); },
+        Rvalue::Use(ref operand) => { expression = gen_expression(operand, data); },
         Rvalue::Cast(..) | Rvalue::Ref(..) => { expression = var.clone(); },
         Rvalue::Box(..) | Rvalue::Len(..) | Rvalue::Repeat(..) | Rvalue::Discriminant(..) => unimplemented!()
     };
@@ -333,9 +332,9 @@ fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
     }
 }
 
-fn gen_expression(operand: &Operand, data: &MirData, depth: usize) -> Expression {
+fn gen_expression(operand: &Operand, data: &MirData) -> Expression {
     match *operand {
-        Operand::Consume (ref l) => gen_lvalue(l.clone(), data, depth),
+        Operand::Consume (ref l) => gen_lvalue(l.clone(), data),
         Operand::Constant (ref c) => match c.literal {
             Literal::Value {ref value} => match *value {
                 ConstVal::Bool(ref const_bool) => Expression::BooleanLiteral(*const_bool),
