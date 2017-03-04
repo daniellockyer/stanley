@@ -10,10 +10,13 @@ use ast::{Expression, BinaryOperator, UnaryOperator, Types};
 use std::fmt::Debug;
 use regex::Regex;
 
+use ast;
+
 pub fn run_solver(verification_condition: &Expression, name: &String) {
     let mut z3: z3::Z3 = Default::default();
     let mut solver = SMTLib2::new(Some(QFAUFBV));
-    let vcon = solver.expr2smtlib(verification_condition);
+    let simplified_condition = ast::simplify_expression(&verification_condition);
+    let vcon = solver.expr2smtlib(&simplified_condition);
     let _ = solver.assert(core::OpCodes::Not, &[vcon]);
     let (_, check) = solver.solve(&mut z3, false);
 
@@ -23,6 +26,7 @@ pub fn run_solver(verification_condition: &Expression, name: &String) {
             let text = model.clone().unwrap();
 
             println!("[INVALID] -- {}", name);
+            println!("\n{:#?}\n", verification_condition);
 
             for cap in re.captures_iter(&text) {
                 println!("   {:7} = {:10?} (0x{})", &cap[2], i64::from_str_radix(&cap[3], 16).unwrap(), &cap[3]);
