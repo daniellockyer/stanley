@@ -103,11 +103,11 @@ pub fn string_to_type(s: String) -> Types {
 impl Debug for Expression {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
         match *self {
-            Expression::BinaryExpression(ref l, op, ref r) => write!(fmt, "({:?} {:?} {:?})", l, op, r),
+            Expression::BinaryExpression(ref l, op, ref r) => write!(fmt, "({:?} {:?} {:?})", op, l, r),
             Expression::UnaryExpression(ref op, ref r) => write!(fmt, "({:?} {:?})", op, r),
             Expression::VariableMapping (ref name, ref var_type) => write!(fmt, "{}:{:?}", name, var_type),
             Expression::BitVector(ref val, ref s) => write!(fmt, "{:?}:{:?}", val, s),
-            Expression::BooleanLiteral(b) => write!(fmt, "{:?}", b)
+            Expression::BooleanLiteral(ref b) => write!(fmt, "{:?}", b)
         }
     }
 }
@@ -131,11 +131,11 @@ impl Debug for BinaryOperator {
             BinaryOperator::GreaterThanOrEqual => write!(fmt, ">="),
             BinaryOperator::Equal => write!(fmt, "=="),
             BinaryOperator::NotEqual => write!(fmt, "!="),
-            BinaryOperator::And => write!(fmt, "&&"),
-            BinaryOperator::Or => write!(fmt, "||"),
+            BinaryOperator::And => write!(fmt, "∧"),
+            BinaryOperator::Or => write!(fmt, "∨"),
             BinaryOperator::Xor => write!(fmt, "XOR"),
-            BinaryOperator::Implication => write!(fmt, "=>"),
-            BinaryOperator::BiImplication => write!(fmt, "=="),
+            BinaryOperator::Implication => write!(fmt, "->"),
+            BinaryOperator::BiImplication => write!(fmt, "<->"),
         }
     }
 }
@@ -144,7 +144,7 @@ impl Debug for UnaryOperator {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
         match *self {
             UnaryOperator::Negation => write!(fmt, "-"),
-            UnaryOperator::Not => write!(fmt, "NOT")
+            UnaryOperator::Not => write!(fmt, "¬")
         }
     }
 }
