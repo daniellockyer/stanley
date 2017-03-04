@@ -16,6 +16,11 @@ macro_rules! error {
     }}
 }
 
+macro_rules! gen_name {
+    ($start:expr, $index:expr, $depth:expr) =>
+        ($start.to_string() + $index.index().to_string().as_str() + $depth.to_string().as_str())
+}
+
 #[macro_use] extern crate rustproof_libsmt;
 extern crate petgraph;
 extern crate regex;
@@ -83,7 +88,7 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         ast::ty_check(&pre_string_expression).unwrap_or_else(|e| error!("{}", e));
         ast::ty_check(&post_string_expression).unwrap_or_else(|e| error!("{}", e));
 
-        let weakest_precondition = gen(0, &data, &post_string_expression);
+        let weakest_precondition = gen(0, 0, &data, &post_string_expression);
 
         let verification_condition = Expression::BinaryExpression(
             Box::new(weakest_precondition.clone()),
@@ -97,8 +102,12 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
     }
 }
 
-fn gen(index: usize, data: &MirData, post_expression: &Expression) -> Expression {
     let mut wp: Expression = Expression::VariableMapping("!!!!".to_string(), Types::Void);
+fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression) -> Expression {
+
+    if depth >= 10 {
+        return Expression::BooleanLiteral(true);
+    }
 
     match data.block_data[index].terminator.clone().unwrap().kind {
         TerminatorKind::Assert{target, ..} | TerminatorKind::Goto{target} => { wp = gen(target.index(), data, post_expression); },
@@ -112,8 +121,8 @@ fn gen(index: usize, data: &MirData, post_expression: &Expression) -> Expression
             Operand::Consume (..) => unimplemented!()
         },
         TerminatorKind::SwitchInt{discr, targets, ..} => {
-            let wp_if = gen(targets[1].index(), data, post_expression);
-            let wp_else = gen(targets[0].index(), data, post_expression);
+            let wp_if = gen(targets[1].index(), depth+1, data, post_expression);
+            let wp_else = gen(targets[0].index(), depth+1, data, post_expression);
 
             let condition = match discr {
                 Operand::Constant (ref constant) => match constant.literal {
@@ -123,7 +132,7 @@ fn gen(index: usize, data: &MirData, post_expression: &Expression) -> Expression
                     },
                     _ => unimplemented!()
                 },
-                Operand::Consume(c) => gen_lvalue(c, data)
+                Operand::Consume(c) => gen_lvalue(c, data, depth)
             };
 
             let not_condition = Expression::UnaryExpression(UnaryOperator::Not, Box::new(condition.clone()));
@@ -142,13 +151,13 @@ fn gen(index: usize, data: &MirData, post_expression: &Expression) -> Expression
     stmts.reverse();
 
     for stmt in stmts {
-        wp = gen_stmt(wp, stmt, data);
+        wp = gen_stmt(wp, stmt, data, depth);
     }
 
     wp
 }
 
-fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
+fn gen_lvalue(lvalue: Lvalue, data: &MirData, depth: usize) -> Expression {
     match lvalue {
         Lvalue::Local(index) => match data.mir.local_kind(index) {
             LocalKind::Arg => Expression::VariableMapping(data.mir.local_decls[index].name.unwrap().as_str().to_string(), ast::string_to_type(data.mir.local_decls[index].ty.to_string())),
@@ -160,9 +169,9 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                         ty = s[0].to_string();
                     }
                 }
-                Expression::VariableMapping("tmp".to_string() + index.index().to_string().as_str(), ast::string_to_type(ty))
+                Expression::VariableMapping(gen_name!("tmp", index, depth), ast::string_to_type(ty))
             },
-            LocalKind::Var => Expression::VariableMapping("var".to_string() + index.index().to_string().as_str(), ast::string_to_type(data.mir.local_decls[index].ty.to_string())),
+            LocalKind::Var => Expression::VariableMapping(gen_name!("var", index, depth), ast::string_to_type(data.mir.local_decls[index].ty.to_string())),
             LocalKind::ReturnPointer => Expression::VariableMapping("ret".to_string(), ast::type_to_enum(data.func_return_type)),
         },
         Lvalue::Projection(pro) => {
@@ -176,7 +185,7 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                         lvalue_type_string = data.mir.local_decls[variable].ty.to_string();
                     },
                     LocalKind::Temp => {
-                        lvalue_name = "tmp".to_string() + variable.index().to_string().as_str();
+                        lvalue_name = gen_name!("tmp", variable, depth);
 
                         match data.mir.local_decls[variable].ty.sty {
                             TypeVariants::TyTuple(s, _) => lvalue_type_string = s[0].to_string(),
@@ -184,7 +193,7 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                         }
                     },
                     LocalKind::Var => {
-                        lvalue_name = "var".to_string() + variable.index().to_string().as_str();
+                        lvalue_name = gen_name!("var", variable, depth);
 
                         let i = match pro.as_ref().elem.clone() {
                             ProjectionElem::Field(ref field, _) => (field.index() as i64).to_string(),
@@ -201,18 +210,13 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                 _ => unimplemented!()
             };
 
-            let index3 = match pro.as_ref().elem.clone() {
-                ProjectionElem::Field(ref field, _) => (field.index() as i64).to_string(),
-                _ => unimplemented!()
-            };
-
-            Expression::VariableMapping(lvalue_name + index3.as_str(), ast::string_to_type(lvalue_type_string))
+            Expression::VariableMapping(lvalue_name, ast::string_to_type(lvalue_type_string))
         },
         Lvalue::Static(_) => unimplemented!()
     }
 }
 
-fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
+fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData, depth: usize) -> Expression {
     let lvalue: Lvalue;
     let rvalue: Rvalue;
 
@@ -224,13 +228,13 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
         _ => return wp
     }
 
-    let var = gen_lvalue(lvalue, data);
+    let var = gen_lvalue(lvalue, data, depth);
     let mut expression = Expression::VariableMapping("!!!!".to_string(), Types::Void);
 
     match rvalue {
         Rvalue::CheckedBinaryOp(ref binop, ref lval, ref rval) | Rvalue::BinaryOp(ref binop, ref lval, ref rval) => {
-            let lvalue = gen_expression(lval, data);
-            let rvalue = gen_expression(rval, data);
+            let lvalue2 = gen_expression(lval, data, depth);
+            let rvalue2 = gen_expression(rval, data, depth);
 
             let op: BinaryOperator = match *binop {
                 BinOp::Add => {
@@ -353,9 +357,9 @@ fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
     }
 }
 
-fn gen_expression(operand: &Operand, data: &MirData) -> Expression {
+fn gen_expression(operand: &Operand, data: &MirData, depth: usize) -> Expression {
     match *operand {
-        Operand::Consume (ref l) => gen_lvalue(l.clone(), data),
+        Operand::Consume (ref l) => gen_lvalue(l.clone(), data, depth),
         Operand::Constant (ref c) => match c.literal {
             Literal::Value {ref value} => match *value {
                 ConstVal::Bool(ref const_bool) => Expression::BooleanLiteral(*const_bool),
