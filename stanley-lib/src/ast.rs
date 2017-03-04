@@ -105,8 +105,8 @@ impl Debug for Expression {
         match *self {
             Expression::BinaryExpression(ref l, op, ref r) => write!(fmt, "({:?} {:?} {:?})", op, l, r),
             Expression::UnaryExpression(ref op, ref r) => write!(fmt, "({:?} {:?})", op, r),
-            Expression::VariableMapping (ref name, ref var_type) => write!(fmt, "{}:{:?}", name, var_type),
-            Expression::BitVector(ref val, ref s) => write!(fmt, "{:?}:{:?}", val, s),
+            Expression::VariableMapping (ref name, _) => write!(fmt, "{}", name),
+            Expression::BitVector(ref val, _) => write!(fmt, "{:?}", val),
             Expression::BooleanLiteral(ref b) => write!(fmt, "{:?}", b)
         }
     }
