@@ -25,7 +25,12 @@ fn check_range2(x:i32) -> bool {
 }
 
 /*********************************************/
-/*
+
+#[condition(pre="true", post="ret == (12:i32 - 1:i32)")]
+fn single_number() -> i32 {
+    11
+}
+
 #[condition(pre="x > 10:i32 && x < 20:i32", post="ret == (x + 1:i32)")]
 fn param_plus_one(x: i32) -> i32 {
     x + 1
@@ -112,7 +117,7 @@ fn add_five(x:i32) -> i32 {
 fn param_minus_five(x: i32) -> i32 {
     x - 5
 }
-*/
+
 
 
 fn main() {
