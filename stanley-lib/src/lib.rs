@@ -225,7 +225,7 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
     }
 
     let var = gen_lvalue(lvalue, data);
-    let mut expression = Vec::new();
+    let mut expression = Expression::VariableMapping("!!!!".to_string(), Types::Void);
 
     match rvalue {
         Rvalue::CheckedBinaryOp(ref binop, ref lval, ref rval) | Rvalue::BinaryOp(ref binop, ref lval, ref rval) => {
@@ -237,6 +237,8 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
                     //wp = smt::overflow_check(&wp, &var, binop, &lvalue, &rvalue);
                     BinaryOperator::Addition
                 },
+            expression = Expression::BinaryExpression(Box::new(lvalue2.clone()), (match *binop {
+                BinOp::Add => BinaryOperator::Addition,
                 BinOp::Sub => BinaryOperator::Subtraction,
                 BinOp::Mul => BinaryOperator::Multiplication,
                 BinOp::Div => BinaryOperator::Division,
@@ -252,34 +254,37 @@ fn gen_stmt(mut wp: Expression, stmt: Statement, data: &MirData) -> Expression {
                 BinOp::Ge => BinaryOperator::GreaterThanOrEqual,
                 BinOp::Eq => BinaryOperator::Equal,
                 BinOp::Ne => BinaryOperator::NotEqual,
-            };
-
-            expression.push(Expression::BinaryExpression(Box::new(lvalue), op, Box::new(rvalue)));
+            }), Box::new(rvalue2));
         },
         Rvalue::UnaryOp(ref unop, ref val) => {
-            expression.push(Expression::UnaryExpression(match *unop {
+            expression = Expression::UnaryExpression(match *unop {
                 UnOp::Not => UnaryOperator::Not,
                 UnOp::Neg => UnaryOperator::Negation,
-            }, Box::new(gen_expression(val, data))));
+            }, Box::new(gen_expression(val, data, depth)));
         },
         Rvalue::Aggregate(ref ag_kind, ref vec_operand) => match *ag_kind {
             AggregateKind::Tuple => {
                 for operand in vec_operand.iter() {
-                    expression.push(Expression::VariableMapping(format!("{:?}", operand), gen_ty(operand, data)));
+                    expression = Expression::VariableMapping(format!("{:?}", operand), ast::string_to_type(match operand.clone() {
+                        Operand::Constant(ref constant) => constant.ty.to_string(),
+                        Operand::Consume(ref lvalue) => match *lvalue {
+                            Lvalue::Local(ref variable) => match data.mir.local_kind(*variable) {
+                                LocalKind::Arg | LocalKind::Temp | LocalKind::Var => data.mir.local_decls[*variable].ty.to_string(),
+                                _ => unimplemented!()
+                            },
+                            Lvalue::Static(_) | Lvalue::Projection(_) => unimplemented!()
+                        }
+                    }));
                 }
             },
             _ => error!("Unsupported aggregate: only tuples are supported")
         },
-        Rvalue::Use(ref operand) => expression.push(gen_expression(operand, data)),
-        Rvalue::Cast(..) | Rvalue::Ref(..) => expression.push(var.clone()),
+        Rvalue::Use(ref operand) => { expression = gen_expression(operand, data, depth); },
+        Rvalue::Cast(..) | Rvalue::Ref(..) => { expression = var.clone(); },
         Rvalue::Box(..) | Rvalue::Len(..) | Rvalue::Repeat(..) | Rvalue::Discriminant(..) => unimplemented!()
     };
 
-    for expr in &expression {
-        wp = substitute_variable_with_expression(&wp, &var, expr);
-    }
-
-    wp
+    substitute_variable_with_expression(&wp, &var, &expression)
 }
 
 fn substitute_variable_with_expression(source_expression: &Expression, target: &Expression, replacement: &Expression) -> Expression {
