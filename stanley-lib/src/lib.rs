@@ -96,29 +96,27 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             Box::new(weakest_precondition.clone()),
         );
 
-        ast::ty_check(&verification_condition).unwrap_or_else(|e| error!("{}", e));
+        let simplified_condition = ast::simplify_expression(&verification_condition);
 
-        smt::run_solver(&verification_condition, &name);
+        ast::ty_check(&simplified_condition).unwrap_or_else(|e| error!("{}", e));
+        smt::run_solver(&simplified_condition, &name);
     }
 }
 
-    let mut wp: Expression = Expression::VariableMapping("!!!!".to_string(), Types::Void);
 fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression) -> Expression {
+    let mut wp;
 
     if depth >= 10 {
         return Expression::BooleanLiteral(true);
     }
 
+
     match data.block_data[index].terminator.clone().unwrap().kind {
-        TerminatorKind::Assert{target, ..} | TerminatorKind::Goto{target} => { wp = gen(target.index(), data, post_expression); },
-        TerminatorKind::Return => { return post_expression.clone(); },
+        TerminatorKind::Assert{target, ..} | TerminatorKind::Goto{target} => { wp = gen(target.index(), depth, data, post_expression); },
+        TerminatorKind::Return => { wp = post_expression.clone(); },
         TerminatorKind::Call{func, ..} => match func {
-            Operand::Constant (ref c) => {
-                if format!("{:?}", c.literal).contains("begin_panic") {
-                    return Expression::BooleanLiteral(false);
-                }
-            },
-            Operand::Consume (..) => unimplemented!()
+            Operand::Constant (ref c) if format!("{:?}", c.literal).contains("begin_panic") => { return Expression::BooleanLiteral(false); },
+            _ => unimplemented!()
         },
         TerminatorKind::SwitchInt{discr, targets, ..} => {
             let wp_if = gen(targets[1].index(), depth+1, data, post_expression);
@@ -236,11 +234,6 @@ fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData, depth: usize) -> Ex
             let lvalue2 = gen_expression(lval, data, depth);
             let rvalue2 = gen_expression(rval, data, depth);
 
-            let op: BinaryOperator = match *binop {
-                BinOp::Add => {
-                    //wp = smt::overflow_check(&wp, &var, binop, &lvalue, &rvalue);
-                    BinaryOperator::Addition
-                },
             expression = Expression::BinaryExpression(Box::new(lvalue2.clone()), (match *binop {
                 BinOp::Add => BinaryOperator::Addition,
                 BinOp::Sub => BinaryOperator::Subtraction,
@@ -302,21 +295,8 @@ fn substitute_variable_with_expression(source_expression: &Expression, target: &
             Expression::UnaryExpression((*op).clone(), Box::new(substitute_variable_with_expression(expr, target, replacement)))
         },
         Expression::VariableMapping(_, _) if source_expression == target => replacement.clone(),
-        _ => (*source_expression).clone()
+        _ => source_expression.clone()
     }
-}
-
-fn gen_ty(operand: &Operand, data: &MirData) -> Types {
-    ast::string_to_type(match operand.clone() {
-        Operand::Constant(ref constant) => constant.ty.to_string(),
-        Operand::Consume(ref lvalue) => match *lvalue {
-            Lvalue::Local(ref variable) => match data.mir.local_kind(*variable) {
-                LocalKind::Arg | LocalKind::Temp | LocalKind::Var => data.mir.local_decls[*variable].ty.to_string(),
-                _ => unimplemented!()
-            },
-            Lvalue::Static(_) | Lvalue::Projection(_) => unimplemented!()
-        }
-    })
 }
 
 fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {

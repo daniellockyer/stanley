@@ -6,13 +6,13 @@ use rustproof_libsmt::logics::qf_aufbv::*;
 use petgraph::graph::NodeIndex;
 use ast::{Expression, BinaryOperator, UnaryOperator, Types};
 
-use rustc::mir::*;
+//use rustc::mir::*;
 use std::fmt::Debug;
 use regex::Regex;
 
 pub fn run_solver(verification_condition: &Expression, name: &String) {
     let mut z3: z3::Z3 = Default::default();
-    let mut solver = SMTLib2::new(Some(QF_AUFBV));
+    let mut solver = SMTLib2::new(Some(QFAUFBV));
     let vcon = solver.expr2smtlib(verification_condition);
     let _ = solver.assert(core::OpCodes::Not, &[vcon]);
     let (_, check) = solver.solve(&mut z3, false);
@@ -40,9 +40,9 @@ pub trait Pred2SMT {
     fn expr2smtlib (&mut self, &Expression) -> Self::Idx;
 }
 
-impl Pred2SMT for SMTLib2<QF_AUFBV> {
+impl Pred2SMT for SMTLib2<QFAUFBV> {
     type Idx = NodeIndex;
-    type Logic = QF_AUFBV;
+    type Logic = QFAUFBV;
 
     fn expr2smtlib (&mut self, vc: &Expression) -> Self::Idx {
         match *vc {
@@ -56,7 +56,6 @@ impl Pred2SMT for SMTLib2<QF_AUFBV> {
                     BinaryOperator::Multiplication => self.assert(bitvec::OpCodes::BvMul, &[l,r]),
                     BinaryOperator::Division => self.assert(bitvec::OpCodes::BvSDiv, &[l,r]),
                     BinaryOperator::Modulo => self.assert(bitvec::OpCodes::BvSMod, &[l,r]),
-
                     BinaryOperator::BitwiseOr => self.assert(core::OpCodes::Or, &[l,r]),
                     BinaryOperator::BitwiseAnd => self.assert(core::OpCodes::And, &[l,r]),
                     BinaryOperator::BitwiseXor => self.assert(core::OpCodes::Xor, &[l,r]),
@@ -111,7 +110,7 @@ fn bitvector_size(ty: Types) -> usize {
     }
 }
 
-pub fn overflow_check(wp: &Expression, var: &Expression, binop: &BinOp, lvalue: &Expression, rvalue: &Expression) -> Expression {
+/*pub fn overflow_check(wp: &Expression, var: &Expression, binop: &BinOp, lvalue: &Expression, rvalue: &Expression) -> Expression {
     Expression::BinaryExpression(
         Box::new(wp.clone()),
         BinaryOperator::And,
@@ -174,4 +173,4 @@ fn signed_add(size: Types, lvalue: &Expression, rvalue: &Expression) -> Expressi
             )
         )
     )
-}
+}*/

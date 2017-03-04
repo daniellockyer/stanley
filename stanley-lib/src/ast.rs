@@ -169,30 +169,85 @@ impl Debug for Types {
 
 pub fn determine_evaluation_type(expression: &Expression) -> Types {
     match ty_check(expression) {
-        Ok(_) => {
-            match *expression {
-                Expression::BinaryExpression(ref l, ref op, _) => {
-                    match *op {
-                        BinaryOperator::Addition | BinaryOperator::Subtraction | BinaryOperator::Multiplication
-                        | BinaryOperator::Division | BinaryOperator::Modulo | BinaryOperator::BitwiseLeftShift
-                        | BinaryOperator::BitwiseRightShift | BinaryOperator::BitwiseOr | BinaryOperator::BitwiseAnd
-                        | BinaryOperator::BitwiseXor => determine_evaluation_type(l),
-                        BinaryOperator::LessThan | BinaryOperator::LessThanOrEqual | BinaryOperator::GreaterThan 
-                        | BinaryOperator::GreaterThanOrEqual | BinaryOperator::Equal | BinaryOperator::NotEqual
-                        | BinaryOperator::And | BinaryOperator::Or | BinaryOperator::Xor
-                        | BinaryOperator::Implication | BinaryOperator::BiImplication => Types::Bool,
-                    }
-                },
-                Expression::UnaryExpression(_, ref expr) => determine_evaluation_type(expr),
-                Expression::VariableMapping(_, ref ty) => *ty,
-                Expression::BooleanLiteral(_) => Types::Bool,
-                Expression::BitVector(_, ref ty) => match *ty {
-                    Types::Bool | Types::Void | Types::Unknown => error!("Invalid or Unsupported integer type: \"{:?}\"", ty),
-                    _ => *ty
+        Ok(_) => match *expression {
+            Expression::BinaryExpression(ref l, ref op, _) => {
+                match *op {
+                    BinaryOperator::Addition | BinaryOperator::Subtraction | BinaryOperator::Multiplication
+                    | BinaryOperator::Division | BinaryOperator::Modulo | BinaryOperator::BitwiseLeftShift
+                    | BinaryOperator::BitwiseRightShift | BinaryOperator::BitwiseOr | BinaryOperator::BitwiseAnd
+                    | BinaryOperator::BitwiseXor => determine_evaluation_type(l),
+                    BinaryOperator::LessThan | BinaryOperator::LessThanOrEqual | BinaryOperator::GreaterThan 
+                    | BinaryOperator::GreaterThanOrEqual | BinaryOperator::Equal | BinaryOperator::NotEqual
+                    | BinaryOperator::And | BinaryOperator::Or | BinaryOperator::Xor
+                    | BinaryOperator::Implication | BinaryOperator::BiImplication => Types::Bool,
                 }
+            },
+            Expression::UnaryExpression(_, ref expr) => determine_evaluation_type(expr),
+            Expression::VariableMapping(_, ref ty) => *ty,
+            Expression::BooleanLiteral(_) => Types::Bool,
+            Expression::BitVector(_, ref ty) => match *ty {
+                Types::Bool | Types::Void | Types::Unknown => error!("Invalid or Unsupported integer type: \"{:?}\"", ty),
+                _ => *ty
             }
         },
         Err(e) => error!("{}", e),
+    }
+}
+
+pub fn simplify_expression (expression: &Expression) -> Expression {
+    match *expression {
+        Expression::BinaryExpression(ref left, ref op, ref right) => {
+            let aa = simplify_expression(left);
+            let ca = simplify_expression(right);
+
+            if *op == BinaryOperator::Equal {
+                match aa {
+                    Expression::BooleanLiteral(val) if val => return ca.clone(),
+                    Expression::BooleanLiteral(_) =>
+                        return simplify_expression(&Expression::UnaryExpression(UnaryOperator::Not, Box::new(ca.clone()))),
+                    _ => match ca {
+                        Expression::BooleanLiteral(val2) if val2 => return aa.clone(),
+                        Expression::BooleanLiteral(_) =>
+                            return simplify_expression(&Expression::UnaryExpression(UnaryOperator::Not, Box::new(aa.clone()))),
+                        _ => {}
+                    }
+                };
+            }
+
+            if let Expression::BitVector(val, _) = aa {
+                if let Expression::BitVector(val2, _) = ca {
+                    match *op {
+                        BinaryOperator::LessThan => return Expression::BooleanLiteral(val < val2),
+                        BinaryOperator::LessThanOrEqual => return Expression::BooleanLiteral(val <= val2),
+                        BinaryOperator::GreaterThan => return Expression::BooleanLiteral(val > val2),
+                        BinaryOperator::GreaterThanOrEqual => return Expression::BooleanLiteral(val >= val2),
+                        _ => {}
+                    }
+                }
+            }
+
+            Expression::BinaryExpression(Box::new(aa), *op, Box::new(ca))
+        },
+        Expression::UnaryExpression(ref a, ref b) => {
+            let ba = simplify_expression(b);
+
+            if *a == UnaryOperator::Not {
+                return match ba {
+                    Expression::BinaryExpression(left, op, right) => return match op {
+                        BinaryOperator::LessThan => Expression::BinaryExpression(left.clone(), BinaryOperator::GreaterThanOrEqual, right.clone()),
+                        BinaryOperator::LessThanOrEqual => Expression::BinaryExpression(left.clone(), BinaryOperator::GreaterThan, right.clone()),
+                        BinaryOperator::GreaterThan => Expression::BinaryExpression(left.clone(), BinaryOperator::LessThanOrEqual, right.clone()),
+                        BinaryOperator::GreaterThanOrEqual => Expression::BinaryExpression(left.clone(), BinaryOperator::LessThan, right.clone()),
+                        _ => expression.clone()
+                    },
+                    Expression::BooleanLiteral(value) => Expression::BooleanLiteral(!value),
+                    _ => Expression::UnaryExpression(a.clone(), Box::new(ba))
+                };
+            }
+
+            Expression::UnaryExpression(a.clone(), Box::new(ba))
+        },
+        _ => expression.clone()
     }
 }
 
