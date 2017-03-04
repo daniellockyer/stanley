@@ -13,7 +13,7 @@ pub enum Expression {
     BooleanLiteral(bool),
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub enum BinaryOperator {
     // Normal operators
     Addition,
@@ -97,12 +97,6 @@ pub fn string_to_type(s: String) -> Types {
         "u64" => Types::U64,
         "()" => Types::Void,
         _ => unimplemented!(),
-    }
-}
-
-impl PartialEq for BinaryOperator {
-    fn eq(&self, _rhs: &BinaryOperator) -> bool {
-        self == _rhs
     }
 }
 
