@@ -91,9 +91,9 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         let weakest_precondition = gen(0, 0, &data, &post_string_expression);
 
         let verification_condition = Expression::BinaryExpression(
-            Box::new(weakest_precondition.clone()),
-            ast::BinaryOperator::Implication,
             Box::new(pre_string_expression.clone()),
+            ast::BinaryOperator::Implication,
+            Box::new(weakest_precondition.clone()),
         );
 
         ast::ty_check(&verification_condition).unwrap_or_else(|e| error!("{}", e));
