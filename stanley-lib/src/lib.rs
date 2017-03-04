@@ -104,7 +104,7 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
     let mut wp;
 
     if depth >= 10 {
-        return Expression::BooleanLiteral(false);
+        return Expression::BooleanLiteral(true);
     }
 
     match data.block_data[index].terminator.clone().unwrap().kind {
