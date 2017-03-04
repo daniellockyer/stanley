@@ -344,14 +344,13 @@ fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
             Expression::VariableMapping(aa, bb)
         },
         Expression::BinaryExpression(a, b, c) => {
-            let aa = walk_and_replace(*a.clone(), data);
-            let ca = walk_and_replace(*c.clone(), data);
-            Expression::BinaryExpression(Box::new(aa), b, Box::new(ca))
+            let aa = Box::new(walk_and_replace(*a.clone(), data));
+            let ca = Box::new(walk_and_replace(*c.clone(), data));
+            Expression::BinaryExpression(aa, b, ca)
         },
         Expression::UnaryExpression(a, b) => {
-            let aa = a;
-            let ba = walk_and_replace(*b.clone(), data);
-            Expression::UnaryExpression(aa, Box::new(ba))
+            let ba = Box::new(walk_and_replace(*b.clone(), data));
+            Expression::UnaryExpression(a, ba)
         },
         _ => expression.clone()
     }
