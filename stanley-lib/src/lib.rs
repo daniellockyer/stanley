@@ -96,10 +96,8 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             Box::new(weakest_precondition.clone()),
         );
 
-        let simplified_condition = ast::simplify_expression(&verification_condition);
-
-        ast::ty_check(&simplified_condition).unwrap_or_else(|e| error!("{}", e));
-        smt::run_solver(&simplified_condition, &name);
+        ast::ty_check(&verification_condition).unwrap_or_else(|e| error!("{}", e));
+        smt::run_solver(&verification_condition, &name);
     }
 }
 
@@ -107,9 +105,8 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
     let mut wp;
 
     if depth >= 10 {
-        return Expression::BooleanLiteral(true);
+        return Expression::BooleanLiteral(false);
     }
-
 
     match data.block_data[index].terminator.clone().unwrap().kind {
         TerminatorKind::Assert{target, ..} | TerminatorKind::Goto{target} => { wp = gen(target.index(), depth, data, post_expression); },
@@ -234,7 +231,7 @@ fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData, depth: usize) -> Ex
             let lvalue2 = gen_expression(lval, data, depth);
             let rvalue2 = gen_expression(rval, data, depth);
 
-            expression = Expression::BinaryExpression(Box::new(lvalue2.clone()), (match *binop {
+            expression = Expression::BinaryExpression(Box::new(lvalue2), (match *binop {
                 BinOp::Add => BinaryOperator::Addition,
                 BinOp::Sub => BinaryOperator::Subtraction,
                 BinOp::Mul => BinaryOperator::Multiplication,
