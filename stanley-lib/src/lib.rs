@@ -310,18 +310,6 @@ fn gen_ty(operand: &Operand, data: &MirData) -> Types {
     })
 }
 
-fn get_argument_type(name: String, data: &MirData) -> Types {
-    for arg in data.mir.args_iter() {
-        let arg2 = &data.mir.local_decls[arg];
-        let a = arg2.name.unwrap().as_str();
-
-        if name == String::from_utf8_lossy(a.as_bytes()) {
-            return ast::type_to_enum(arg2.ty)
-        }
-    }
-    Types::Unknown
-}
-
 fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
     match expression {
         Expression::VariableMapping(a, b) => {
@@ -332,7 +320,15 @@ fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
                 if aa == "ret" {
                     bb = ast::type_to_enum(data.func_return_type);
                 } else {
-                    bb = get_argument_type(a, data);
+                    for arg in data.mir.args_iter() {
+                        let arg2 = &data.mir.local_decls[arg];
+                        let a2 = arg2.name.unwrap().as_str();
+
+                        if a == String::from_utf8_lossy(a2.as_bytes()) {
+                            bb = ast::type_to_enum(arg2.ty);
+                            break;
+                        }
+                    }
                 }
             }
 
