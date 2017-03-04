@@ -14,6 +14,8 @@ fn loopy12() -> i32 {
     b
 }
 
+/*********************************************/
+
 #[condition(pre="x < 100:i32 && x > 10:i32", post="ret == (x < 100:i32 && x > 10:i32)")]
 fn check_range(x:i32) -> bool {
     x < 100 && x > 10
@@ -23,8 +25,6 @@ fn check_range(x:i32) -> bool {
 fn check_range2(x:i32) -> bool {
     x < 100 && x > 10
 }
-
-/*********************************************/
 
 #[condition(pre="true", post="ret == (12:i32 - 1:i32)")]
 fn single_number() -> i32 {
