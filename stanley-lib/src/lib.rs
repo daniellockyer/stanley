@@ -105,7 +105,7 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
 
     match data.block_data[index].terminator.clone().unwrap().kind {
         TerminatorKind::Assert{target, ..} | TerminatorKind::Goto{target} => { wp = gen(target.index(), depth, data, post_expression); },
-        TerminatorKind::Return => { wp = post_expression.clone(); },
+        TerminatorKind::Return => { return post_expression.clone(); },
         TerminatorKind::Call{func, ..} => match func {
             Operand::Constant (ref c) if format!("{:?}", c.literal).contains("begin_panic") => return Expression::BooleanLiteral(false),
             _ => unimplemented!()
