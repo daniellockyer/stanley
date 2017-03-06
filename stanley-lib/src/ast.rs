@@ -215,8 +215,13 @@ pub fn simplify_expression (expression: &Expression) -> Expression {
             }
 
             if let Expression::BitVector(val, _) = aa {
-                if let Expression::BitVector(val2, _) = ca {
+                if let Expression::BitVector(val2, ty) = ca {
                     match *op {
+                        BinaryOperator::Addition => return Expression::BitVector(val + val2, ty),
+                        BinaryOperator::Subtraction => return Expression::BitVector(val - val2, ty),
+                        BinaryOperator::Multiplication => return Expression::BitVector(val * val2, ty),
+                        BinaryOperator::Division => return Expression::BitVector(val / val2, ty),
+                        BinaryOperator::Equal => return Expression::BooleanLiteral(val == val2),
                         BinaryOperator::LessThan => return Expression::BooleanLiteral(val < val2),
                         BinaryOperator::LessThanOrEqual => return Expression::BooleanLiteral(val <= val2),
                         BinaryOperator::GreaterThan => return Expression::BooleanLiteral(val > val2),
