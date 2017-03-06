@@ -2,21 +2,41 @@
 #![plugin(stanlib)]
 #![allow(dead_code)]
 
-#[condition(pre="true", post="ret == 15:i32")]
+#[condition(pre="true", post="ret == 10:i32")]
 fn loopy12() -> i32 {
     let mut a = 0;
     let mut b = 0;
 
-    while a < 5 {
+    while a < 4 {
         a += 1;
         b += a;
     }
     b
 }
 
-/*********************************************/
+#[condition(pre="x < 100:i32 && x > 10:i32", post="ret == (x * 4:i32)")]
+fn loopy1(x: i32) -> i32 {
+    let mut a = 0;
+    let mut b = 0;
 
-#[condition(pre="x < 100:i32 && x > 10:i32", post="ret == (x < 100:i32 && x > 10:i32)")]
+    while a < 4 {
+        a += 1;
+        b += x;
+    }
+    b
+}
+
+#[condition(pre="x < 100:i32 && x > 10:i32", post="ret == (x / 2:i32)")]
+fn divide_two(x:i32) -> i32 {
+    x >> 1
+}
+
+#[condition(pre="x < 100:i32 && x > 10:i32 && y < 10:i32 && y > 1:i32", post="ret == (x * 4:i32) / y")]
+fn multiply_by_4_div_y(x:i32, y:i32) -> i32 {
+    (x << 2) / y
+}
+
+#[condition(pre="x < 1000:i32 && x > 1:i32", post="ret == (x < 100:i32 && x > 10:i32)")]
 fn check_range(x:i32) -> bool {
     x < 100 && x > 10
 }
@@ -49,7 +69,7 @@ fn div_two(x:i32) -> i32 {
 #[condition(pre="true", post="ret == !x")]
 fn boolean_not(x:bool) -> bool {
     if x {
-        false // buggy - change to false
+        false
     } else {
         true
     }
@@ -67,12 +87,12 @@ fn bigger_than_input(x:i32, y:i32) -> bool {
 
 #[condition(pre="true", post="ret == (x < 5:i32)")]
 fn check_less_than_five(x:i32) -> bool {
-    x < 5 // buggy - change to 5
+    x < 5
 }
 
 #[condition(pre="true", post="ret == (x < 8:i32)")]
 fn check_less_than_eight(x: i32) -> bool {
-    if x < 8 { //buggy - remove equals
+    if x < 8 {
         true
     } else {
         false
@@ -118,7 +138,4 @@ fn param_minus_five(x: i32) -> i32 {
     x - 5
 }
 
-
-
-fn main() {
-}
+fn main() {}
