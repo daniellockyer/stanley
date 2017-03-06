@@ -26,7 +26,8 @@ pub fn run_solver(verification_condition: &Expression, name: &String) {
             let text = model.clone().unwrap();
 
             println!("[INVALID] -- {}", name);
-            println!("\n{:#?}\n", verification_condition);
+            /*println!("{:?}", verification_condition);
+            println!("{:?}", simplified_condition);*/
 
             for cap in re.captures_iter(&text) {
                 println!("   {:7} = {:10?} (0x{})", &cap[2], i64::from_str_radix(&cap[3], 16).unwrap(), &cap[3]);
