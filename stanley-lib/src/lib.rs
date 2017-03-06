@@ -103,10 +103,6 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
 fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression) -> Expression {
     let mut wp;
 
-    if depth >= 10 {
-        return Expression::BooleanLiteral(true);
-    }
-
     match data.block_data[index].terminator.clone().unwrap().kind {
         TerminatorKind::Assert{target, ..} | TerminatorKind::Goto{target} => { wp = gen(target.index(), depth, data, post_expression); },
         TerminatorKind::Return => { wp = post_expression.clone(); },
@@ -115,6 +111,10 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
             _ => unimplemented!()
         },
         TerminatorKind::SwitchInt{discr, targets, ..} => {
+            if depth >= 5 {
+                return Expression::BooleanLiteral(true);
+            }
+
             let wp_if = gen(targets[1].index(), depth+1, data, post_expression);
             let wp_else = gen(targets[0].index(), depth+1, data, post_expression);
 
