@@ -14,7 +14,7 @@ fn loopy12() -> i32 {
     b
 }
 
-#[condition(pre="x < 100:i32 && x > 10:i32", post="ret == (x * 4:i32)")]
+#[condition(pre="true", post="ret == (x * 4:i32)")]
 fn loopy1(x: i32) -> i32 {
     let mut a = 0;
     let mut b = 0;
@@ -31,7 +31,7 @@ fn divide_two(x:i32) -> i32 {
     x >> 1
 }
 
-#[condition(pre="x < 100:i32 && x > 10:i32 && y < 10:i32 && y > 1:i32", post="ret == (x * 4:i32) / y")]
+#[condition(pre="true", post="ret == (x * 4:i32) / y")]
 fn multiply_by_4_div_y(x:i32, y:i32) -> i32 {
     (x << 2) / y
 }
