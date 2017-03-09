@@ -214,6 +214,24 @@ pub fn simplify_expression (expression: &Expression) -> Expression {
                 };
             }
 
+            if (*op == BinaryOperator::Implication || *op == BinaryOperator::Equal) && aa == ca {
+                return Expression::BooleanLiteral(true);
+            }
+
+            if let Expression::BooleanLiteral(val) = aa {
+                if let Expression::BooleanLiteral(val2) = ca {
+                    match *op {
+                        BinaryOperator::Implication => return match (val, val2) {
+                            (true, true) | (false, _) => Expression::BooleanLiteral(true),
+                            _ => Expression::BooleanLiteral(false),
+                        },
+                        BinaryOperator::And => return Expression::BooleanLiteral(val && val2),
+                        BinaryOperator::Or => return Expression::BooleanLiteral(val || val2),
+                        _ => {}
+                    }
+                }
+            }
+
             if let Expression::BitVector(val, _) = aa {
                 if let Expression::BitVector(val2, ty) = ca {
                     match *op {
