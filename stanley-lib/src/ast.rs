@@ -321,8 +321,8 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
                 Ok(_) => {
                     match ty_check(r) {
                         Ok(_) => {
-                            let l_type: Types = determine_evaluation_type(l);
-                            let r_type: Types = determine_evaluation_type(r);
+                            let l_type = determine_evaluation_type(l);
+                            let r_type = determine_evaluation_type(r);
 
                             match *op {
                                 BinaryOperator::Addition | BinaryOperator::Subtraction | BinaryOperator::Multiplication | BinaryOperator::Division | BinaryOperator::Modulo => {
