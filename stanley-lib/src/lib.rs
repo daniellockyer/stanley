@@ -115,6 +115,32 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
                 return Expression::BooleanLiteral(true);
             }
 
+            let ref a = data.block_data[index].statements;
+
+            for stmt in a {
+                if let StatementKind::Assign(ref lval2, ref rval2) = stmt.kind {
+                    let lval_name = format!("{:?}", lval2);
+                    let discr_name = format!("{:?}", discr);
+
+                    if lval_name == discr_name {
+                        match *rval2 {
+                            Rvalue::CheckedBinaryOp(_, _, ref rval) | Rvalue::BinaryOp(_, _, ref rval) => {
+                                if let Operand::Constant (ref constant) = *rval {
+                                    if let Literal::Value {ref value} = constant.literal {
+                                        if let ConstVal::Integral (ref integral_value) = *value {
+                                            if depth > integral_value.to_u32().unwrap() as usize {
+                                                return Expression::BooleanLiteral(true);
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            _ => {}
+                        }
+                    }
+                }
+            }
+
             let wp_if = gen(targets[1].index(), depth+1, data, post_expression);
             let wp_else = gen(targets[0].index(), depth+1, data, post_expression);
 
