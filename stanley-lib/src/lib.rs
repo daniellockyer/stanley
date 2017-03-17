@@ -274,7 +274,7 @@ fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData) -> Expression {
         },
         Rvalue::Use(ref operand) => { expression = gen_expression(operand, data); },
         Rvalue::Cast(..) | Rvalue::Ref(..) => { expression = var.clone(); },
-        Rvalue::InlineAsm{..} | Rvalue::Box(..) | Rvalue::Len(..) | Rvalue::Repeat(..) | Rvalue::Discriminant(..) => unimplemented!()
+        Rvalue::Box(..) | Rvalue::Len(..) | Rvalue::Repeat(..) | Rvalue::Discriminant(..) => unimplemented!()
     };
 
     substitute_variable_with_expression(&wp, &var, &expression)
