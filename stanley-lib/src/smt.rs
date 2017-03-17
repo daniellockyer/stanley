@@ -25,7 +25,7 @@ pub fn run_solver(verification_condition: &Expression, name: &String) {
             let re = Regex::new(r".+(\(define-fun\s+([a-zA-Z0-9]+).*\s+#x([0-9a-f]+)\))+").unwrap();
             let text = model.clone().unwrap();
 
-            println!("[INVALID] -- {}", name);
+            println!("!! [INVALID] -- {}", name);
             /*println!("{:?}", verification_condition);
             println!("{:?}", simplified_condition);*/
 
