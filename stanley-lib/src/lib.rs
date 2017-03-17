@@ -104,7 +104,7 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
             Box::new(weakest_precondition.clone()),
         );
 
-        ast::ty_check(&verification_condition).unwrap_or_else(|e| error!("{}", e));
+        //ast::ty_check(&verification_condition).unwrap_or_else(|e| error!("{}", e));
         run_solver(&verification_condition, &name);
     }
 }
