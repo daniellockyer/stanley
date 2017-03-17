@@ -111,7 +111,7 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
             _ => unimplemented!()
         },
         TerminatorKind::SwitchInt{discr, targets, ..} => {
-            if depth > 4 {
+            if depth > 199 {
                 return Expression::BooleanLiteral(true);
             }
 
