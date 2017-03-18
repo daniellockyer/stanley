@@ -392,7 +392,7 @@ fn gen_expression(operand: &Operand, data: &MirData) -> Expression {
 
 fn parse_condition(condition: String) -> Expression {
     condition_parser::parse_Condition(&*condition)
-        .unwrap_or_else(|e| error!("Error parsing condition \"{}\" with error \"{:?}\"", condition, e))
+        .unwrap_or_else(|e| error!("Error parsing condition `{}` with error `{:?}`", condition, e))
 }
 
 fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
@@ -408,7 +408,7 @@ fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
                             match i_string.name.to_string().as_ref() {
                                 "pre" => pre_string = attr_param_value.to_string(),
                                 "post" => post_string = attr_param_value.to_string(),
-                                _ => error!("I only accept `pre` and `post`. You gave me \"{}\"", i_string.name)
+                                _ => error!("I only accept `pre` and `post`. You gave me `{}`", i_string.name)
                             }
                         }
                     }
