@@ -5780,13 +5780,10 @@ mod __parse__Condition {
                                        0,
                                        0,
                                        0];
-    const __EOF_ACTION: &'static [i32] =
-        &[0, -68, -38, -40, -42, -44, -46, -48, -50, -52, -54, -22, -30, -31, -32, -33, -34, -35,
-          -36, -28, 0, 0, 0, 0, -24, -23, -26, -55, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -39, -41, -43, -45, -47, -49, -51, -53, -27, -65,
-          -56, -58, -59, -60, -57, -62, -63, -64, -61, 0, -29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          -25, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const __EOF_ACTION: &'static [i32] = &[0, -68, -38, -40, -42, -44, -46, -48, -50, -52, -54, -22, -30, -31, -32, -33, -34, -35, -36, -28, 0, 0, 0, 0, -24, -23, -26, -55, 0, 0, 0, 0, 0, 0, 0, 0,
+                                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -39,
+                                           -41, -43, -45, -47, -49, -51, -53, -27, -65, -56, -58, -59, -60, -57, -62, -63, -64, -61, 0, -29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -25, 0, 0, 0, 0, 0, 0,
+                                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     const __GOTO: &'static [i32] = &[// State 0
                                      0,
                                      0,
@@ -10146,9 +10143,7 @@ mod __parse__Condition {
                         })
             .collect()
     }
-    pub fn parse_Condition<'input>
-        (input: &'input str)
-         -> Result<Expression, __lalrpop_util::ParseError<usize, (usize, &'input str), ()>> {
+    pub fn parse_Condition<'input>(input: &'input str) -> Result<Expression, __lalrpop_util::ParseError<usize, (usize, &'input str), ()>> {
         let mut __tokens = super::__intern_token::__Matcher::new(input);
         let mut __states = vec![0_i32];
         let mut __symbols = vec![];
@@ -10440,9 +10435,7 @@ mod __parse__Condition {
                         }
                         37 => {
                             match __lookahead.1 {
-                                (37, __tok0) => {
-                                    __Symbol::Termr_23_22_2d_3f_5b0_2d9_5d_2b_22_23(__tok0)
-                                }
+                                (37, __tok0) => __Symbol::Termr_23_22_2d_3f_5b0_2d9_5d_2b_22_23(__tok0),
                                 _ => unreachable!(),
                             }
                         }
@@ -10498,14 +10491,13 @@ mod __parse__Condition {
             }
         }
     }
-    pub fn __reduce<'input>
-        (input: &'input str,
-         __action: i32,
-         __lookahead_start: Option<&usize>,
-         __states: &mut ::std::vec::Vec<i32>,
-         __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
-         _: ::std::marker::PhantomData<()>)
-         -> Option<Result<Expression, __lalrpop_util::ParseError<usize, (usize, &'input str), ()>>> {
+    pub fn __reduce<'input>(input: &'input str,
+                            __action: i32,
+                            __lookahead_start: Option<&usize>,
+                            __states: &mut ::std::vec::Vec<i32>,
+                            __symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>,
+                            _: ::std::marker::PhantomData<()>)
+                            -> Option<Result<Expression, __lalrpop_util::ParseError<usize, (usize, &'input str), ()>>> {
         let __nonterminal = match -__action {
             1 => {
                 // BOP1 = "&&" => ActionFn(20);
@@ -10942,9 +10934,7 @@ mod __parse__Condition {
                 let __nt = super::__action66(input, __sym0, __sym1, __sym2);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 3);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cCondition_2c_20BOP1_2c_20E2_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cCondition_2c_20BOP1_2c_20E2_3e(__nt), __end));
                 18
             }
             40 => {
@@ -10955,9 +10945,7 @@ mod __parse__Condition {
                 let __nt = super::__action67(input, __sym0);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 1);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cCondition_2c_20BOP1_2c_20E2_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cCondition_2c_20BOP1_2c_20E2_3e(__nt), __end));
                 18
             }
             41 => {
@@ -10970,9 +10958,7 @@ mod __parse__Condition {
                 let __nt = super::__action64(input, __sym0, __sym1, __sym2);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 3);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE2_2c_20BOP2_2c_20E3_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE2_2c_20BOP2_2c_20E3_3e(__nt), __end));
                 19
             }
             42 => {
@@ -10983,9 +10969,7 @@ mod __parse__Condition {
                 let __nt = super::__action65(input, __sym0);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 1);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE2_2c_20BOP2_2c_20E3_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE2_2c_20BOP2_2c_20E3_3e(__nt), __end));
                 19
             }
             43 => {
@@ -10998,9 +10982,7 @@ mod __parse__Condition {
                 let __nt = super::__action62(input, __sym0, __sym1, __sym2);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 3);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE3_2c_20BOP3_2c_20E4_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE3_2c_20BOP3_2c_20E4_3e(__nt), __end));
                 20
             }
             44 => {
@@ -11011,9 +10993,7 @@ mod __parse__Condition {
                 let __nt = super::__action63(input, __sym0);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 1);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE3_2c_20BOP3_2c_20E4_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE3_2c_20BOP3_2c_20E4_3e(__nt), __end));
                 20
             }
             45 => {
@@ -11026,9 +11006,7 @@ mod __parse__Condition {
                 let __nt = super::__action60(input, __sym0, __sym1, __sym2);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 3);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE4_2c_20BOP4_2c_20E5_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE4_2c_20BOP4_2c_20E5_3e(__nt), __end));
                 21
             }
             46 => {
@@ -11039,9 +11017,7 @@ mod __parse__Condition {
                 let __nt = super::__action61(input, __sym0);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 1);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE4_2c_20BOP4_2c_20E5_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE4_2c_20BOP4_2c_20E5_3e(__nt), __end));
                 21
             }
             47 => {
@@ -11054,9 +11030,7 @@ mod __parse__Condition {
                 let __nt = super::__action58(input, __sym0, __sym1, __sym2);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 3);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE5_2c_20BOP5_2c_20E6_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE5_2c_20BOP5_2c_20E6_3e(__nt), __end));
                 22
             }
             48 => {
@@ -11067,9 +11041,7 @@ mod __parse__Condition {
                 let __nt = super::__action59(input, __sym0);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 1);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE5_2c_20BOP5_2c_20E6_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE5_2c_20BOP5_2c_20E6_3e(__nt), __end));
                 22
             }
             49 => {
@@ -11082,9 +11054,7 @@ mod __parse__Condition {
                 let __nt = super::__action56(input, __sym0, __sym1, __sym2);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 3);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE6_2c_20BOP6_2c_20E7_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE6_2c_20BOP6_2c_20E7_3e(__nt), __end));
                 23
             }
             50 => {
@@ -11095,9 +11065,7 @@ mod __parse__Condition {
                 let __nt = super::__action57(input, __sym0);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 1);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE6_2c_20BOP6_2c_20E7_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE6_2c_20BOP6_2c_20E7_3e(__nt), __end));
                 23
             }
             51 => {
@@ -11110,9 +11078,7 @@ mod __parse__Condition {
                 let __nt = super::__action54(input, __sym0, __sym1, __sym2);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 3);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE7_2c_20BOP7_2c_20E8_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE7_2c_20BOP7_2c_20E8_3e(__nt), __end));
                 24
             }
             52 => {
@@ -11123,9 +11089,7 @@ mod __parse__Condition {
                 let __nt = super::__action55(input, __sym0);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 1);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE7_2c_20BOP7_2c_20E8_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE7_2c_20BOP7_2c_20E8_3e(__nt), __end));
                 24
             }
             53 => {
@@ -11138,9 +11102,7 @@ mod __parse__Condition {
                 let __nt = super::__action52(input, __sym0, __sym1, __sym2);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 3);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE8_2c_20BOP8_2c_20E9_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE8_2c_20BOP8_2c_20E9_3e(__nt), __end));
                 25
             }
             54 => {
@@ -11151,15 +11113,12 @@ mod __parse__Condition {
                 let __nt = super::__action53(input, __sym0);
                 let __states_len = __states.len();
                 __states.truncate(__states_len - 1);
-                __symbols.push((__start,
-                                __Symbol::NtExprHelper_3cE8_2c_20BOP8_2c_20E9_3e(__nt),
-                                __end));
+                __symbols.push((__start, __Symbol::NtExprHelper_3cE8_2c_20BOP8_2c_20E9_3e(__nt), __end));
                 25
             }
             55 => {
                 // IDENTIFIER = r#"[a-zA-Z][a-zA-Z0-9_]*"# => ActionFn(41);
-                let __sym0 =
-                    __pop_Termr_23_22_5ba_2dzA_2dZ_5d_5ba_2dzA_2dZ0_2d9___5d_2a_22_23(__symbols);
+                let __sym0 = __pop_Termr_23_22_5ba_2dzA_2dZ_5d_5ba_2dzA_2dZ0_2d9___5d_2a_22_23(__symbols);
                 let __start = __sym0.0.clone();
                 let __end = __sym0.2.clone();
                 let __nt = super::__action41(input, __sym0);
@@ -11315,600 +11274,421 @@ mod __parse__Condition {
         __states.push(__next_state);
         None
     }
-    fn __pop_Term_22_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                                -> (usize, &'input str, usize) {
+    fn __pop_Term_22_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_21_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_21_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_21_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_21_3d_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                       __Symbol<'input>,
-                                                                       usize)>)
-                                      -> (usize, &'input str, usize) {
+    fn __pop_Term_22_21_3d_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_21_3d_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_25_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_25_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_25_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_26_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_26_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_26_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_26_26_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                       __Symbol<'input>,
-                                                                       usize)>)
-                                      -> (usize, &'input str, usize) {
+    fn __pop_Term_22_26_26_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_26_26_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_28_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_28_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_28_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_29_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_29_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_29_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_2a_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_2a_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_2a_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_2b_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_2b_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_2b_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_2d_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_2d_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_2d_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_2f_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_2f_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_2f_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_3a_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_3a_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_3a_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_3c_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_3c_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_3c_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_3c_3c_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                       __Symbol<'input>,
-                                                                       usize)>)
-                                      -> (usize, &'input str, usize) {
+    fn __pop_Term_22_3c_3c_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_3c_3c_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_3c_3d_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                       __Symbol<'input>,
-                                                                       usize)>)
-                                      -> (usize, &'input str, usize) {
+    fn __pop_Term_22_3c_3d_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_3c_3d_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_3c_3d_3e_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                          __Symbol<'input>,
-                                                                          usize)>)
-                                         -> (usize, &'input str, usize) {
+    fn __pop_Term_22_3c_3d_3e_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_3c_3d_3e_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_3d_3d_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                       __Symbol<'input>,
-                                                                       usize)>)
-                                      -> (usize, &'input str, usize) {
+    fn __pop_Term_22_3d_3d_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_3d_3d_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_3d_3e_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                       __Symbol<'input>,
-                                                                       usize)>)
-                                      -> (usize, &'input str, usize) {
+    fn __pop_Term_22_3d_3e_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_3d_3e_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_3e_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_3e_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_3e_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_3e_3d_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                       __Symbol<'input>,
-                                                                       usize)>)
-                                      -> (usize, &'input str, usize) {
+    fn __pop_Term_22_3e_3d_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_3e_3d_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_3e_3e_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                       __Symbol<'input>,
-                                                                       usize)>)
-                                      -> (usize, &'input str, usize) {
+    fn __pop_Term_22_3e_3e_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_3e_3e_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22XOR_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22XOR_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22XOR_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_5e_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_5e_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_5e_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22bool_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                     __Symbol<'input>,
-                                                                     usize)>)
-                                    -> (usize, &'input str, usize) {
+    fn __pop_Term_22bool_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22bool_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22false_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                      __Symbol<'input>,
-                                                                      usize)>)
-                                     -> (usize, &'input str, usize) {
+    fn __pop_Term_22false_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22false_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22i16_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22i16_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22i16_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22i32_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22i32_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22i32_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22i64_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22i64_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22i64_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22i8_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                   __Symbol<'input>,
-                                                                   usize)>)
-                                  -> (usize, &'input str, usize) {
+    fn __pop_Term_22i8_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22i8_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22true_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                     __Symbol<'input>,
-                                                                     usize)>)
-                                    -> (usize, &'input str, usize) {
+    fn __pop_Term_22true_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22true_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22u16_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22u16_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22u16_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22u32_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22u32_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22u32_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22u64_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22u64_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22u64_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22u8_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                   __Symbol<'input>,
-                                                                   usize)>)
-                                  -> (usize, &'input str, usize) {
+    fn __pop_Term_22u8_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22u8_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_7c_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                    __Symbol<'input>,
-                                                                    usize)>)
-                                   -> (usize, &'input str, usize) {
+    fn __pop_Term_22_7c_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_7c_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Term_22_7c_7c_22<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                       __Symbol<'input>,
-                                                                       usize)>)
-                                      -> (usize, &'input str, usize) {
+    fn __pop_Term_22_7c_7c_22<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Term_22_7c_7c_22(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Termr_23_22_2d_3f_5b0_2d9_5d_2b_22_23<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-) -> (usize, &'input str, usize){
+    fn __pop_Termr_23_22_2d_3f_5b0_2d9_5d_2b_22_23<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Termr_23_22_2d_3f_5b0_2d9_5d_2b_22_23(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Termr_23_22_5ba_2dzA_2dZ_5d_5ba_2dzA_2dZ0_2d9___5d_2a_22_23<'input>
-        (__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-         -> (usize, &'input str, usize) {
+    fn __pop_Termr_23_22_5ba_2dzA_2dZ_5d_5ba_2dzA_2dZ0_2d9___5d_2a_22_23<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, &'input str, usize) {
         match __symbols.pop().unwrap() {
-            (__l,
-             __Symbol::Termr_23_22_5ba_2dzA_2dZ_5d_5ba_2dzA_2dZ0_2d9___5d_2a_22_23(__v),
-             __r) => (__l, __v, __r),
+            (__l, __Symbol::Termr_23_22_5ba_2dzA_2dZ_5d_5ba_2dzA_2dZ0_2d9___5d_2a_22_23(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Termerror<'input>
-        (__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-         -> (usize, __lalrpop_util::ErrorRecovery<usize, (usize, &'input str), ()>, usize) {
+    fn __pop_Termerror<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, __lalrpop_util::ErrorRecovery<usize, (usize, &'input str), ()>, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Termerror(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtBOP1<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                            -> (usize, BinaryOperator, usize) {
+    fn __pop_NtBOP1<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, BinaryOperator, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtBOP1(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtBOP2<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                            -> (usize, BinaryOperator, usize) {
+    fn __pop_NtBOP2<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, BinaryOperator, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtBOP2(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtBOP3<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                            -> (usize, BinaryOperator, usize) {
+    fn __pop_NtBOP3<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, BinaryOperator, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtBOP3(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtBOP4<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                            -> (usize, BinaryOperator, usize) {
+    fn __pop_NtBOP4<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, BinaryOperator, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtBOP4(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtBOP5<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                            -> (usize, BinaryOperator, usize) {
+    fn __pop_NtBOP5<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, BinaryOperator, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtBOP5(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtBOP6<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                            -> (usize, BinaryOperator, usize) {
+    fn __pop_NtBOP6<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, BinaryOperator, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtBOP6(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtBOP7<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                            -> (usize, BinaryOperator, usize) {
+    fn __pop_NtBOP7<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, BinaryOperator, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtBOP7(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtBOP8<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                            -> (usize, BinaryOperator, usize) {
+    fn __pop_NtBOP8<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, BinaryOperator, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtBOP8(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtCondition<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                  __Symbol<'input>,
-                                                                  usize)>)
-                                 -> (usize, Expression, usize) {
+    fn __pop_NtCondition<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtCondition(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtE10<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                           -> (usize, Expression, usize) {
+    fn __pop_NtE10<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtE10(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtE2<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                          -> (usize, Expression, usize) {
+    fn __pop_NtE2<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtE2(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtE3<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                          -> (usize, Expression, usize) {
+    fn __pop_NtE3<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtE3(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtE4<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                          -> (usize, Expression, usize) {
+    fn __pop_NtE4<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtE4(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtE5<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                          -> (usize, Expression, usize) {
+    fn __pop_NtE5<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtE5(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtE6<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                          -> (usize, Expression, usize) {
+    fn __pop_NtE6<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtE6(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtE7<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                          -> (usize, Expression, usize) {
+    fn __pop_NtE7<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtE7(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtE8<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                          -> (usize, Expression, usize) {
+    fn __pop_NtE8<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtE8(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtE9<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                          -> (usize, Expression, usize) {
+    fn __pop_NtE9<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtE9(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtExprHelper_3cCondition_2c_20BOP1_2c_20E2_3e<'input>
-        (__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-         -> (usize, Expression, usize) {
+    fn __pop_NtExprHelper_3cCondition_2c_20BOP1_2c_20E2_3e<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
-            (__l, __Symbol::NtExprHelper_3cCondition_2c_20BOP1_2c_20E2_3e(__v), __r) => {
-                (__l, __v, __r)
-            }
+            (__l, __Symbol::NtExprHelper_3cCondition_2c_20BOP1_2c_20E2_3e(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtExprHelper_3cE2_2c_20BOP2_2c_20E3_3e<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-) -> (usize, Expression, usize){
+    fn __pop_NtExprHelper_3cE2_2c_20BOP2_2c_20E3_3e<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtExprHelper_3cE2_2c_20BOP2_2c_20E3_3e(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtExprHelper_3cE3_2c_20BOP3_2c_20E4_3e<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-) -> (usize, Expression, usize){
+    fn __pop_NtExprHelper_3cE3_2c_20BOP3_2c_20E4_3e<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtExprHelper_3cE3_2c_20BOP3_2c_20E4_3e(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtExprHelper_3cE4_2c_20BOP4_2c_20E5_3e<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-) -> (usize, Expression, usize){
+    fn __pop_NtExprHelper_3cE4_2c_20BOP4_2c_20E5_3e<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtExprHelper_3cE4_2c_20BOP4_2c_20E5_3e(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtExprHelper_3cE5_2c_20BOP5_2c_20E6_3e<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-) -> (usize, Expression, usize){
+    fn __pop_NtExprHelper_3cE5_2c_20BOP5_2c_20E6_3e<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtExprHelper_3cE5_2c_20BOP5_2c_20E6_3e(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtExprHelper_3cE6_2c_20BOP6_2c_20E7_3e<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-) -> (usize, Expression, usize){
+    fn __pop_NtExprHelper_3cE6_2c_20BOP6_2c_20E7_3e<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtExprHelper_3cE6_2c_20BOP6_2c_20E7_3e(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtExprHelper_3cE7_2c_20BOP7_2c_20E8_3e<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-) -> (usize, Expression, usize){
+    fn __pop_NtExprHelper_3cE7_2c_20BOP7_2c_20E8_3e<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtExprHelper_3cE7_2c_20BOP7_2c_20E8_3e(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtExprHelper_3cE8_2c_20BOP8_2c_20E9_3e<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-) -> (usize, Expression, usize){
+    fn __pop_NtExprHelper_3cE8_2c_20BOP8_2c_20E9_3e<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtExprHelper_3cE8_2c_20BOP8_2c_20E9_3e(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtIDENTIFIER<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                   __Symbol<'input>,
-                                                                   usize)>)
-                                  -> (usize, String, usize) {
+    fn __pop_NtIDENTIFIER<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, String, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtIDENTIFIER(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtTYPE<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                            -> (usize, Types, usize) {
+    fn __pop_NtTYPE<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Types, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtTYPE(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_NtUOP<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>)
-                           -> (usize, UnaryOperator, usize) {
+    fn __pop_NtUOP<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, UnaryOperator, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::NtUOP(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
         }
     }
-    fn __pop_Nt____Condition<'input>(__symbols: &mut ::std::vec::Vec<(usize,
-                                                                      __Symbol<'input>,
-                                                                      usize)>)
-                                     -> (usize, Expression, usize) {
+    fn __pop_Nt____Condition<'input>(__symbols: &mut ::std::vec::Vec<(usize, __Symbol<'input>, usize)>) -> (usize, Expression, usize) {
         match __symbols.pop().unwrap() {
             (__l, __Symbol::Nt____Condition(__v), __r) => (__l, __v, __r),
             _ => panic!("symbol type mismatch"),
@@ -13767,8 +13547,7 @@ mod __intern_token {
     }
 
     impl<'input> Iterator for __Matcher<'input> {
-        type Item = Result<(usize, (usize, &'input str), usize),
-               __lalrpop_util::ParseError<usize, (usize, &'input str), ()>>;
+        type Item = Result<(usize, (usize, &'input str), usize), __lalrpop_util::ParseError<usize, (usize, &'input str), ()>>;
 
         fn next(&mut self) -> Option<Self::Item> {
             let __text = self.text.trim_left();
@@ -13788,11 +13567,7 @@ mod __intern_token {
                         self.consumed = __end_offset;
                         Some(Ok((__start_offset, (__index, __result), __end_offset)))
                     }
-                    None => {
-                        Some(Err(__lalrpop_util::ParseError::InvalidToken {
-                                     location: __start_offset,
-                                 }))
-                    }
+                    None => Some(Err(__lalrpop_util::ParseError::InvalidToken { location: __start_offset })),
                 }
             }
         }
@@ -13800,119 +13575,82 @@ mod __intern_token {
 }
 
 #[allow(unused_variables)]
-pub fn __action0<'input>(input: &'input str,
-                         (_, __0, _): (usize, Expression, usize))
-                         -> Expression {
+pub fn __action0<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action1<'input>(input: &'input str,
-                         (_, __0, _): (usize, Expression, usize))
-                         -> Expression {
+pub fn __action1<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action2<'input>(input: &'input str,
-                         (_, __0, _): (usize, Expression, usize))
-                         -> Expression {
+pub fn __action2<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action3<'input>(input: &'input str,
-                         (_, __0, _): (usize, Expression, usize))
-                         -> Expression {
+pub fn __action3<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action4<'input>(input: &'input str,
-                         (_, __0, _): (usize, Expression, usize))
-                         -> Expression {
+pub fn __action4<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action5<'input>(input: &'input str,
-                         (_, __0, _): (usize, Expression, usize))
-                         -> Expression {
+pub fn __action5<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action6<'input>(input: &'input str,
-                         (_, __0, _): (usize, Expression, usize))
-                         -> Expression {
+pub fn __action6<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action7<'input>(input: &'input str,
-                         (_, __0, _): (usize, Expression, usize))
-                         -> Expression {
+pub fn __action7<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action8<'input>(input: &'input str,
-                         (_, __0, _): (usize, Expression, usize))
-                         -> Expression {
+pub fn __action8<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action9<'input>(input: &'input str,
-                         (_, op, _): (usize, UnaryOperator, usize),
-                         (_, e, _): (usize, Expression, usize))
-                         -> Expression {
+pub fn __action9<'input>(input: &'input str, (_, op, _): (usize, UnaryOperator, usize), (_, e, _): (usize, Expression, usize)) -> Expression {
     Expression::UnaryExpression(op, Box::new(e))
 }
 
 #[allow(unused_variables)]
-pub fn __action10<'input>(input: &'input str,
-                          (_, __0, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action10<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action11<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> Expression {
+pub fn __action11<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> Expression {
     Expression::BooleanLiteral(true)
 }
 
 #[allow(unused_variables)]
-pub fn __action12<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> Expression {
+pub fn __action12<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> Expression {
     Expression::BooleanLiteral(false)
 }
 
 #[allow(unused_variables)]
-pub fn __action13<'input>(input: &'input str,
-                          (_, n, _): (usize, &'input str, usize),
-                          (_, _, _): (usize, &'input str, usize),
-                          (_, t, _): (usize, Types, usize))
-                          -> Expression {
+pub fn __action13<'input>(input: &'input str, (_, n, _): (usize, &'input str, usize), (_, _, _): (usize, &'input str, usize), (_, t, _): (usize, Types, usize)) -> Expression {
     Expression::BitVector(i64::from_str(n).unwrap(), t)
 }
 
 #[allow(unused_variables)]
-pub fn __action14<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> Expression {
+pub fn __action14<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> Expression {
     Expression::BitVector(i64::from_str(__0).unwrap(), Types::Unknown)
 }
 
 #[allow(unused_variables)]
-pub fn __action15<'input>(input: &'input str,
-                          (_, __0, _): (usize, String, usize),
-                          (_, _, _): (usize, &'input str, usize),
-                          (_, __1, _): (usize, Types, usize))
-                          -> Expression {
+pub fn __action15<'input>(input: &'input str, (_, __0, _): (usize, String, usize), (_, _, _): (usize, &'input str, usize), (_, __1, _): (usize, Types, usize)) -> Expression {
     Expression::VariableMapping(__0, __1)
 }
 
@@ -13922,172 +13660,122 @@ pub fn __action16<'input>(input: &'input str, (_, __0, _): (usize, String, usize
 }
 
 #[allow(unused_variables)]
-pub fn __action17<'input>(input: &'input str,
-                          (_, _, _): (usize, &'input str, usize),
-                          (_, __0, _): (usize, Expression, usize),
-                          (_, _, _): (usize, &'input str, usize))
-                          -> Expression {
+pub fn __action17<'input>(input: &'input str, (_, _, _): (usize, &'input str, usize), (_, __0, _): (usize, Expression, usize), (_, _, _): (usize, &'input str, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action18<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> UnaryOperator {
+pub fn __action18<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> UnaryOperator {
     UnaryOperator::Negation
 }
 
 #[allow(unused_variables)]
-pub fn __action19<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> UnaryOperator {
+pub fn __action19<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> UnaryOperator {
     UnaryOperator::Not
 }
 
 #[allow(unused_variables)]
-pub fn __action20<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action20<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::And
 }
 
 #[allow(unused_variables)]
-pub fn __action21<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action21<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::Or
 }
 
 #[allow(unused_variables)]
-pub fn __action22<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action22<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::Xor
 }
 
 #[allow(unused_variables)]
-pub fn __action23<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action23<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::Implication
 }
 
 #[allow(unused_variables)]
-pub fn __action24<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action24<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::BiImplication
 }
 
 #[allow(unused_variables)]
-pub fn __action25<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action25<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::LessThan
 }
 
 #[allow(unused_variables)]
-pub fn __action26<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action26<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::LessThanOrEqual
 }
 
 #[allow(unused_variables)]
-pub fn __action27<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action27<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::GreaterThan
 }
 
 #[allow(unused_variables)]
-pub fn __action28<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action28<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::GreaterThanOrEqual
 }
 
 #[allow(unused_variables)]
-pub fn __action29<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action29<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::Equal
 }
 
 #[allow(unused_variables)]
-pub fn __action30<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action30<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::NotEqual
 }
 
 #[allow(unused_variables)]
-pub fn __action31<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action31<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::BitwiseOr
 }
 
 #[allow(unused_variables)]
-pub fn __action32<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action32<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::BitwiseXor
 }
 
 #[allow(unused_variables)]
-pub fn __action33<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action33<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::BitwiseAnd
 }
 
 #[allow(unused_variables)]
-pub fn __action34<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action34<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::BitwiseLeftShift
 }
 
 #[allow(unused_variables)]
-pub fn __action35<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action35<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::BitwiseRightShift
 }
 
 #[allow(unused_variables)]
-pub fn __action36<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action36<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::Addition
 }
 
 #[allow(unused_variables)]
-pub fn __action37<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action37<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::Subtraction
 }
 
 #[allow(unused_variables)]
-pub fn __action38<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action38<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::Multiplication
 }
 
 #[allow(unused_variables)]
-pub fn __action39<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action39<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::Division
 }
 
 #[allow(unused_variables)]
-pub fn __action40<'input>(input: &'input str,
-                          (_, __0, _): (usize, &'input str, usize))
-                          -> BinaryOperator {
+pub fn __action40<'input>(input: &'input str, (_, __0, _): (usize, &'input str, usize)) -> BinaryOperator {
     BinaryOperator::Modulo
 }
 
@@ -14147,130 +13835,82 @@ pub fn __action51<'input>(input: &'input str, (_, __0, _): (usize, &'input str, 
 }
 
 #[allow(unused_variables)]
-pub fn __action52<'input>(input: &'input str,
-                          (_, left, _): (usize, Expression, usize),
-                          (_, op, _): (usize, BinaryOperator, usize),
-                          (_, right, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action52<'input>(input: &'input str, (_, left, _): (usize, Expression, usize), (_, op, _): (usize, BinaryOperator, usize), (_, right, _): (usize, Expression, usize)) -> Expression {
     Expression::BinaryExpression(Box::new(left), op, Box::new(right))
 }
 
 #[allow(unused_variables)]
-pub fn __action53<'input>(input: &'input str,
-                          (_, __0, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action53<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action54<'input>(input: &'input str,
-                          (_, left, _): (usize, Expression, usize),
-                          (_, op, _): (usize, BinaryOperator, usize),
-                          (_, right, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action54<'input>(input: &'input str, (_, left, _): (usize, Expression, usize), (_, op, _): (usize, BinaryOperator, usize), (_, right, _): (usize, Expression, usize)) -> Expression {
     Expression::BinaryExpression(Box::new(left), op, Box::new(right))
 }
 
 #[allow(unused_variables)]
-pub fn __action55<'input>(input: &'input str,
-                          (_, __0, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action55<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action56<'input>(input: &'input str,
-                          (_, left, _): (usize, Expression, usize),
-                          (_, op, _): (usize, BinaryOperator, usize),
-                          (_, right, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action56<'input>(input: &'input str, (_, left, _): (usize, Expression, usize), (_, op, _): (usize, BinaryOperator, usize), (_, right, _): (usize, Expression, usize)) -> Expression {
     Expression::BinaryExpression(Box::new(left), op, Box::new(right))
 }
 
 #[allow(unused_variables)]
-pub fn __action57<'input>(input: &'input str,
-                          (_, __0, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action57<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action58<'input>(input: &'input str,
-                          (_, left, _): (usize, Expression, usize),
-                          (_, op, _): (usize, BinaryOperator, usize),
-                          (_, right, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action58<'input>(input: &'input str, (_, left, _): (usize, Expression, usize), (_, op, _): (usize, BinaryOperator, usize), (_, right, _): (usize, Expression, usize)) -> Expression {
     Expression::BinaryExpression(Box::new(left), op, Box::new(right))
 }
 
 #[allow(unused_variables)]
-pub fn __action59<'input>(input: &'input str,
-                          (_, __0, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action59<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action60<'input>(input: &'input str,
-                          (_, left, _): (usize, Expression, usize),
-                          (_, op, _): (usize, BinaryOperator, usize),
-                          (_, right, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action60<'input>(input: &'input str, (_, left, _): (usize, Expression, usize), (_, op, _): (usize, BinaryOperator, usize), (_, right, _): (usize, Expression, usize)) -> Expression {
     Expression::BinaryExpression(Box::new(left), op, Box::new(right))
 }
 
 #[allow(unused_variables)]
-pub fn __action61<'input>(input: &'input str,
-                          (_, __0, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action61<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action62<'input>(input: &'input str,
-                          (_, left, _): (usize, Expression, usize),
-                          (_, op, _): (usize, BinaryOperator, usize),
-                          (_, right, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action62<'input>(input: &'input str, (_, left, _): (usize, Expression, usize), (_, op, _): (usize, BinaryOperator, usize), (_, right, _): (usize, Expression, usize)) -> Expression {
     Expression::BinaryExpression(Box::new(left), op, Box::new(right))
 }
 
 #[allow(unused_variables)]
-pub fn __action63<'input>(input: &'input str,
-                          (_, __0, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action63<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action64<'input>(input: &'input str,
-                          (_, left, _): (usize, Expression, usize),
-                          (_, op, _): (usize, BinaryOperator, usize),
-                          (_, right, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action64<'input>(input: &'input str, (_, left, _): (usize, Expression, usize), (_, op, _): (usize, BinaryOperator, usize), (_, right, _): (usize, Expression, usize)) -> Expression {
     Expression::BinaryExpression(Box::new(left), op, Box::new(right))
 }
 
 #[allow(unused_variables)]
-pub fn __action65<'input>(input: &'input str,
-                          (_, __0, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action65<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 
 #[allow(unused_variables)]
-pub fn __action66<'input>(input: &'input str,
-                          (_, left, _): (usize, Expression, usize),
-                          (_, op, _): (usize, BinaryOperator, usize),
-                          (_, right, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action66<'input>(input: &'input str, (_, left, _): (usize, Expression, usize), (_, op, _): (usize, BinaryOperator, usize), (_, right, _): (usize, Expression, usize)) -> Expression {
     Expression::BinaryExpression(Box::new(left), op, Box::new(right))
 }
 
 #[allow(unused_variables)]
-pub fn __action67<'input>(input: &'input str,
-                          (_, __0, _): (usize, Expression, usize))
-                          -> Expression {
+pub fn __action67<'input>(input: &'input str, (_, __0, _): (usize, Expression, usize)) -> Expression {
     (__0)
 }
 

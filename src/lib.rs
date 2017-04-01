@@ -95,9 +95,7 @@ impl<'tcx> MirPass<'tcx> for StanleyMir {
 
         let weakest_precondition = gen(0, 0, &data, &post_string_expression);
 
-        let verification_condition = Expression::BinaryExpression(Box::new(pre_string_expression),
-                                                                  ast::BinaryOperator::Implication,
-                                                                  Box::new(weakest_precondition));
+        let verification_condition = Expression::BinaryExpression(Box::new(pre_string_expression), ast::BinaryOperator::Implication, Box::new(weakest_precondition));
 
         run_solver(&verification_condition, &name);
     }
@@ -172,13 +170,9 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
 
             let not_condition = Expression::UnaryExpression(UnaryOperator::Not, Box::new(condition.clone()));
 
-            wp = Expression::BinaryExpression(Box::new(Expression::BinaryExpression(Box::new(condition),
-                                                                                    BinaryOperator::Implication,
-                                                                                    Box::new(wp_if))),
+            wp = Expression::BinaryExpression(Box::new(Expression::BinaryExpression(Box::new(condition), BinaryOperator::Implication, Box::new(wp_if))),
                                               ast::BinaryOperator::And,
-                                              Box::new(Expression::BinaryExpression(Box::new(not_condition),
-                                                                                    BinaryOperator::Implication,
-                                                                                    Box::new(wp_else))));
+                                              Box::new(Expression::BinaryExpression(Box::new(not_condition), BinaryOperator::Implication, Box::new(wp_else))));
         }
         TerminatorKind::DropAndReplace { .. } |
         TerminatorKind::Drop { .. } |
@@ -218,10 +212,7 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                     }
                     Expression::VariableMapping(gen_name!("tmp", index), ast::string_to_type(ty))
                 }
-                LocalKind::Var => {
-                    Expression::VariableMapping(gen_name!("var", index),
-                                                ast::string_to_type(data.mir.local_decls[index].ty.to_string()))
-                }
+                LocalKind::Var => Expression::VariableMapping(gen_name!("var", index), ast::string_to_type(data.mir.local_decls[index].ty.to_string())),
                 LocalKind::ReturnPointer => Expression::VariableMapping("ret".to_string(), ast::type_to_enum(data.mir.return_ty)),
             }
         }
@@ -372,10 +363,7 @@ fn substitute_variable_with_expression(source_expression: &Expression, target: &
             let new_right = Box::new(substitute_variable_with_expression(right, target, replacement));
             Expression::BinaryExpression(new_left, *op, new_right)
         }
-        Expression::UnaryExpression(ref op, ref expr) => {
-            Expression::UnaryExpression((*op).clone(),
-                                        Box::new(substitute_variable_with_expression(expr, target, replacement)))
-        }
+        Expression::UnaryExpression(ref op, ref expr) => Expression::UnaryExpression((*op).clone(), Box::new(substitute_variable_with_expression(expr, target, replacement))),
         Expression::VariableMapping(_, _) if source_expression == target => replacement.clone(),
         _ => source_expression.clone(),
     }
@@ -449,11 +437,7 @@ fn gen_expression(operand: &Operand, data: &MirData) -> Expression {
 }
 
 fn parse_condition(condition: String) -> Expression {
-    condition_parser::parse_Condition(&*condition).unwrap_or_else(|e| {
-                                                                      error!("Error parsing condition `{}` with error `{:?}`",
-                                                                             condition,
-                                                                             e)
-                                                                  })
+    condition_parser::parse_Condition(&*condition).unwrap_or_else(|e| error!("Error parsing condition `{}` with error `{:?}`", condition, e))
 }
 
 fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
@@ -469,10 +453,7 @@ fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
                             match i_string.name.to_string().as_ref() {
                                 "pre" => pre_string = attr_param_value.to_string(),
                                 "post" => post_string = attr_param_value.to_string(),
-                                _ => {
-                                    error!("I only accept `pre` and `post`. You gave me `{}`",
-                                           i_string.name)
-                                }
+                                _ => error!("I only accept `pre` and `post`. You gave me `{}`", i_string.name),
                             }
                         }
                     }
@@ -502,10 +483,7 @@ pub fn run_solver(verification_condition: &Expression, name: &String) {
             println!("{:?}", simplified_condition);*/
 
             for cap in re.captures_iter(&text) {
-                println!("   {:7} = {:10?} (0x{})",
-                         &cap[2],
-                         i64::from_str_radix(&cap[3], 16).unwrap(),
-                         &cap[3]);
+                println!("   {:7} = {:10?} (0x{})", &cap[2], i64::from_str_radix(&cap[3], 16).unwrap(), &cap[3]);
             }
         }
         SMTRes::Unsat(..) => println!("[VALID] -- {}", name),

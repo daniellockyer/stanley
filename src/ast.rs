@@ -281,11 +281,7 @@ pub fn simplify_expression(expression: &Expression) -> Expression {
                 return match ba {
                            Expression::BinaryExpression(left, op, right) => {
                                return match op {
-                                          BinaryOperator::LessThan => {
-                                              Expression::BinaryExpression(left.clone(),
-                                                                           BinaryOperator::GreaterThanOrEqual,
-                                                                           right.clone())
-                                          }
+                                          BinaryOperator::LessThan => Expression::BinaryExpression(left.clone(), BinaryOperator::GreaterThanOrEqual, right.clone()),
                                           BinaryOperator::LessThanOrEqual => Expression::BinaryExpression(left.clone(), BinaryOperator::GreaterThan, right.clone()),
                                           BinaryOperator::GreaterThan => Expression::BinaryExpression(left.clone(), BinaryOperator::LessThanOrEqual, right.clone()),
                                           BinaryOperator::GreaterThanOrEqual => Expression::BinaryExpression(left.clone(), BinaryOperator::LessThan, right.clone()),
@@ -338,11 +334,7 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
                     match ty_check(expr) {
                         Ok(_) => {
                             match determine_evaluation_type(expr) {
-                                Types::Bool => {
-                                    Err(format!("Invalid use of operator `{:?}` on boolean value `{:?}`",
-                                                *op,
-                                                *expr))
-                                }
+                                Types::Bool => Err(format!("Invalid use of operator `{:?}` on boolean value `{:?}`", *op, *expr)),
                                 _ => Ok(true),
                             }
                         }
@@ -352,11 +344,7 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
                 UnaryOperator::Not => {
                     match determine_evaluation_type(expr) {
                         Types::Bool => Ok(true),
-                        _ => {
-                            Err(format!("Invalid use of operator `{:?}` on non-boolean value `{:?}`",
-                                        *op,
-                                        *expr))
-                        }
+                        _ => Err(format!("Invalid use of operator `{:?}` on non-boolean value `{:?}`", *op, *expr)),
                     }
                 }
             }
@@ -382,15 +370,9 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
                                 BinaryOperator::Division |
                                 BinaryOperator::Modulo => {
                                     if (l_type == Types::Bool) || (r_type == Types::Bool) {
-                                        Err(format!("Invalid use of binary operator `{:?}` on boolean value: `{:?}` and `{:?}`",
-                                                    op,
-                                                    l_type,
-                                                    r_type))
+                                        Err(format!("Invalid use of binary operator `{:?}` on boolean value: `{:?}` and `{:?}`", op, l_type, r_type))
                                     } else if l_type != r_type {
-                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`",
-                                                    l_type,
-                                                    op,
-                                                    r_type))
+                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`", l_type, op, r_type))
                                     } else {
                                         Ok(true)
                                     }
@@ -398,15 +380,9 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
                                 BinaryOperator::BitwiseLeftShift |
                                 BinaryOperator::BitwiseRightShift => {
                                     if (l_type == Types::Bool) || (r_type == Types::Bool) {
-                                        Err(format!("Invalid use of binary operator `{:?}` on boolean value: `{:?}` and `{:?}`",
-                                                    op,
-                                                    l_type,
-                                                    r_type))
+                                        Err(format!("Invalid use of binary operator `{:?}` on boolean value: `{:?}` and `{:?}`", op, l_type, r_type))
                                     } else if !same_signedness(l_type, r_type) {
-                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`",
-                                                    l_type,
-                                                    op,
-                                                    r_type))
+                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`", l_type, op, r_type))
                                     } else {
                                         Ok(true)
                                     }
@@ -415,10 +391,7 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
                                 BinaryOperator::BitwiseAnd |
                                 BinaryOperator::BitwiseXor => {
                                     if l_type != r_type {
-                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`",
-                                                    l_type,
-                                                    op,
-                                                    r_type))
+                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`", l_type, op, r_type))
                                     } else {
                                         Ok(true)
                                     }
@@ -428,25 +401,16 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
                                 BinaryOperator::GreaterThan |
                                 BinaryOperator::GreaterThanOrEqual => {
                                     if (l_type == Types::Bool) || (r_type == Types::Bool) {
-                                        Err(format!("Invalid use of binary operator `{:?}` on boolean value: `{:?}` and `{:?}`",
-                                                    op,
-                                                    l_type,
-                                                    r_type))
+                                        Err(format!("Invalid use of binary operator `{:?}` on boolean value: `{:?}` and `{:?}`", op, l_type, r_type))
                                     } else if l_type != r_type {
-                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`",
-                                                    l_type,
-                                                    op,
-                                                    r_type))
+                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`", l_type, op, r_type))
                                     } else {
                                         Ok(true)
                                     }
                                 }
                                 BinaryOperator::Equal | BinaryOperator::NotEqual => {
                                     if l_type != r_type {
-                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`",
-                                                    l_type,
-                                                    op,
-                                                    r_type))
+                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`", l_type, op, r_type))
                                     } else {
                                         Ok(true)
                                     }
@@ -457,15 +421,9 @@ pub fn ty_check(expression: &Expression) -> Result<bool, String> {
                                 BinaryOperator::Implication |
                                 BinaryOperator::BiImplication => {
                                     if (l_type != Types::Bool) || (r_type != Types::Bool) {
-                                        Err(format!("Invalid use of binary operator `{:?}` on boolean value: `{:?}` and `{:?}`",
-                                                    op,
-                                                    l_type,
-                                                    r_type))
+                                        Err(format!("Invalid use of binary operator `{:?}` on boolean value: `{:?}` and `{:?}`", op, l_type, r_type))
                                     } else if l_type != r_type {
-                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`",
-                                                    l_type,
-                                                    op,
-                                                    r_type))
+                                        Err(format!("Binary operand types do not match: `{:?} {:?} {:?}`", l_type, op, r_type))
                                     } else {
                                         Ok(true)
                                     }
