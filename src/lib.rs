@@ -1,6 +1,3 @@
-//! Stanley is a Rust compiler plugin to verify functions annotated with
-//! preconditions and postconditions.
-
 #![feature(plugin_registrar, rustc_private)]
 
 #[macro_export]
