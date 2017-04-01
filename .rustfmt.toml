@@ -1,2 +1,7 @@
-max_width=200
-fn_call_width=200
+chain_one_line_max=100
+reorder_imports=true
+reorder_imported_names=true
+use_try_shorthand=true
+spaces_around_ranges=true
+error_on_line_overflow=false
+format_strings=true
