@@ -1,5 +1,5 @@
 #![feature(plugin, custom_attribute)]
-#![plugin(stanlib)]
+#![plugin(stanley)]
 #![allow(dead_code)]
 
 #[condition(pre="true", post="ret == 10:i32")]

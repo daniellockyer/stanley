@@ -34,7 +34,7 @@ extern crate rustc_const_math;
 use rustc_plugin::Registry;
 use rustc::mir::transform::{Pass, MirPass, MirSource};
 use rustc::mir::*;
-use rustc::ty::{TyCtxt, Ty, TypeVariants};
+use rustc::ty::{TyCtxt, TypeVariants};
 use rustc::middle::const_val::ConstVal;
 use rustc_const_math::ConstInt;
 use syntax::feature_gate::AttributeType;
@@ -400,7 +400,7 @@ fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
 
     for attr in attrs {
         if let Some(ref items) = attr.meta_item_list() {
-            for item in items {
+            for item in items.iter() {
                 if let NestedMetaItemKind::MetaItem(ref i_string) = item.node {
                     if let MetaItemKind::NameValue(ref literal) = i_string.node {
                         if let syntax::ast::LitKind::Str(ref attr_param_value, _) = literal.node {
