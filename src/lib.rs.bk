@@ -116,7 +116,9 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
         }
         TerminatorKind::Call { func, .. } => {
             match func {
-                Operand::Constant(ref c) if format!("{:?}", c.literal).contains("begin_panic") => return Expression::BooleanLiteral(false),
+                Operand::Constant(ref c) if format!("{:?}", c.literal).contains("begin_panic") => {
+                    return Expression::BooleanLiteral(false)
+                }
                 _ => unimplemented!(),
             }
         }
@@ -170,15 +172,14 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
                 Operand::Consume(c) => gen_lvalue(c, data),
             };
 
-            let not_condition = Expression::UnaryExpression(UnaryOperator::Not, Box::new(condition.clone()));
+            let not_condition = Expression::UnaryExpression(UnaryOperator::Not,
+                                                            Box::new(condition.clone()));
 
-            wp = Expression::BinaryExpression(Box::new(Expression::BinaryExpression(Box::new(condition),
-                                                                                    BinaryOperator::Implication,
-                                                                                    Box::new(wp_if))),
-                                              ast::BinaryOperator::And,
-                                              Box::new(Expression::BinaryExpression(Box::new(not_condition),
-                                                                                    BinaryOperator::Implication,
-                                                                                    Box::new(wp_else))));
+            wp = Expression::BinaryExpression(
+                Box::new(Expression::BinaryExpression(Box::new(condition), BinaryOperator::Implication, Box::new(wp_if))),
+                ast::BinaryOperator::And,
+                Box::new(Expression::BinaryExpression(Box::new(not_condition), BinaryOperator::Implication, Box::new(wp_else)))
+            );
         }
         TerminatorKind::DropAndReplace { .. } |
         TerminatorKind::Drop { .. } |
@@ -206,7 +207,9 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                                                     .unwrap()
                                                     .as_str()
                                                     .to_string(),
-                                                ast::string_to_type(data.mir.local_decls[index].ty.to_string()))
+                                                ast::string_to_type(data.mir.local_decls[index]
+                                                                        .ty
+                                                                        .to_string()))
                 }
                 LocalKind::Temp => {
                     let mut ty = data.mir.local_decls[index].ty.to_string();
@@ -220,9 +223,14 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                 }
                 LocalKind::Var => {
                     Expression::VariableMapping(gen_name!("var", index),
-                                                ast::string_to_type(data.mir.local_decls[index].ty.to_string()))
+                                                ast::string_to_type(data.mir.local_decls[index]
+                                                                        .ty
+                                                                        .to_string()))
                 }
-                LocalKind::ReturnPointer => Expression::VariableMapping("ret".to_string(), ast::type_to_enum(data.mir.return_ty)),
+                LocalKind::ReturnPointer => {
+                    Expression::VariableMapping("ret".to_string(),
+                                                ast::type_to_enum(data.mir.return_ty))
+                }
             }
         }
         Lvalue::Projection(pro) => {
@@ -244,7 +252,9 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                             lvalue_name = gen_name!("tmp", variable);
 
                             match data.mir.local_decls[variable].ty.sty {
-                                TypeVariants::TyTuple(s, _) => lvalue_type_string = s[0].to_string(),
+                                TypeVariants::TyTuple(s, _) => {
+                                    lvalue_type_string = s[0].to_string()
+                                }
                                 _ => unimplemented!(),
                             }
                         }
@@ -252,14 +262,18 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                             lvalue_name = gen_name!("var", variable);
 
                             let i = match pro.as_ref().elem.clone() {
-                                    ProjectionElem::Field(ref field, _) => (field.index() as i64).to_string(),
+                                    ProjectionElem::Field(ref field, _) => {
+                                        (field.index() as i64).to_string()
+                                    }
                                     _ => unimplemented!(),
                                 }
                                 .parse::<usize>()
                                 .unwrap();
 
                             match data.mir.local_decls[variable].ty.sty {
-                                TypeVariants::TyTuple(s, _) => lvalue_type_string = s[i].to_string(),
+                                TypeVariants::TyTuple(s, _) => {
+                                    lvalue_type_string = s[i].to_string()
+                                }
                                 _ => unimplemented!(),
                             }
                         }
@@ -296,26 +310,27 @@ fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData) -> Expression {
             let lvalue2 = gen_expression(lval, data);
             let rvalue2 = gen_expression(rval, data);
 
-            expression = Expression::BinaryExpression(Box::new(lvalue2),
-                                                      (match *binop {
-                                                           BinOp::Add => BinaryOperator::Addition,
-                                                           BinOp::Sub => BinaryOperator::Subtraction,
-                                                           BinOp::Mul => BinaryOperator::Multiplication,
-                                                           BinOp::Div => BinaryOperator::Division,
-                                                           BinOp::Rem => BinaryOperator::Modulo,
-                                                           BinOp::BitOr => BinaryOperator::BitwiseOr,
-                                                           BinOp::BitAnd => BinaryOperator::BitwiseAnd,
-                                                           BinOp::BitXor => BinaryOperator::BitwiseXor,
-                                                           BinOp::Shl => BinaryOperator::BitwiseLeftShift,
-                                                           BinOp::Shr => BinaryOperator::BitwiseRightShift,
-                                                           BinOp::Lt => BinaryOperator::LessThan,
-                                                           BinOp::Le => BinaryOperator::LessThanOrEqual,
-                                                           BinOp::Gt => BinaryOperator::GreaterThan,
-                                                           BinOp::Ge => BinaryOperator::GreaterThanOrEqual,
-                                                           BinOp::Eq => BinaryOperator::Equal,
-                                                           BinOp::Ne => BinaryOperator::NotEqual,
-                                                       }),
-                                                      Box::new(rvalue2));
+            expression =
+                Expression::BinaryExpression(Box::new(lvalue2),
+                                             (match *binop {
+                                                  BinOp::Add => BinaryOperator::Addition,
+                                                  BinOp::Sub => BinaryOperator::Subtraction,
+                                                  BinOp::Mul => BinaryOperator::Multiplication,
+                                                  BinOp::Div => BinaryOperator::Division,
+                                                  BinOp::Rem => BinaryOperator::Modulo,
+                                                  BinOp::BitOr => BinaryOperator::BitwiseOr,
+                                                  BinOp::BitAnd => BinaryOperator::BitwiseAnd,
+                                                  BinOp::BitXor => BinaryOperator::BitwiseXor,
+                                                  BinOp::Shl => BinaryOperator::BitwiseLeftShift,
+                                                  BinOp::Shr => BinaryOperator::BitwiseRightShift,
+                                                  BinOp::Lt => BinaryOperator::LessThan,
+                                                  BinOp::Le => BinaryOperator::LessThanOrEqual,
+                                                  BinOp::Gt => BinaryOperator::GreaterThan,
+                                                  BinOp::Ge => BinaryOperator::GreaterThanOrEqual,
+                                                  BinOp::Eq => BinaryOperator::Equal,
+                                                  BinOp::Ne => BinaryOperator::NotEqual,
+                                              }),
+                                             Box::new(rvalue2));
         }
         Rvalue::UnaryOp(ref unop, ref val) => {
             expression = Expression::UnaryExpression(match *unop {
@@ -328,23 +343,16 @@ fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData) -> Expression {
             match *ag_kind {
                 AggregateKind::Tuple => {
                     for operand in vec_operand.iter() {
-                        expression =
-                            Expression::VariableMapping(format!("{:?}", operand),
-                                                        ast::string_to_type(match operand.clone() {
-                                                                                Operand::Constant(ref constant) => constant.ty.to_string(),
-                                                                                Operand::Consume(ref lvalue) => {
-                                                                                    match *lvalue {
-                                                                                        Lvalue::Local(ref variable) => {
-                                                                                            match data.mir.local_kind(*variable) {
-                                                                                                LocalKind::Arg | LocalKind::Temp | LocalKind::Var => data.mir.local_decls[*variable].ty.to_string(),
-                                                                                                _ => unimplemented!(),
-                                                                                            }
-                                                                                        }
-                                                                                        Lvalue::Static(_) |
-                                                                                        Lvalue::Projection(_) => unimplemented!(),
-                                                                                    }
-                                                                                }
-                                                                            }));
+                        expression = Expression::VariableMapping(format!("{:?}", operand), ast::string_to_type(match operand.clone() {
+                        Operand::Constant(ref constant) => constant.ty.to_string(),
+                        Operand::Consume(ref lvalue) => match *lvalue {
+                            Lvalue::Local(ref variable) => match data.mir.local_kind(*variable) {
+                                LocalKind::Arg | LocalKind::Temp | LocalKind::Var => data.mir.local_decls[*variable].ty.to_string(),
+                                _ => unimplemented!()
+                            },
+                            Lvalue::Static(_) | Lvalue::Projection(_) => unimplemented!()
+                        }
+                    }));
                     }
                 }
                 _ => error!("Unsupported aggregate: only tuples are supported"),
@@ -365,16 +373,22 @@ fn gen_stmt(wp: Expression, stmt: Statement, data: &MirData) -> Expression {
     substitute_variable_with_expression(&wp, &var, &expression)
 }
 
-fn substitute_variable_with_expression(source_expression: &Expression, target: &Expression, replacement: &Expression) -> Expression {
+fn substitute_variable_with_expression(source_expression: &Expression,
+                                       target: &Expression,
+                                       replacement: &Expression)
+                                       -> Expression {
     match *source_expression {
         Expression::BinaryExpression(ref left, ref op, ref right) => {
             let new_left = Box::new(substitute_variable_with_expression(left, target, replacement));
-            let new_right = Box::new(substitute_variable_with_expression(right, target, replacement));
+            let new_right =
+                Box::new(substitute_variable_with_expression(right, target, replacement));
             Expression::BinaryExpression(new_left, *op, new_right)
         }
         Expression::UnaryExpression(ref op, ref expr) => {
             Expression::UnaryExpression((*op).clone(),
-                                        Box::new(substitute_variable_with_expression(expr, target, replacement)))
+                                        Box::new(substitute_variable_with_expression(expr,
+                                                                                     target,
+                                                                                     replacement)))
         }
         Expression::VariableMapping(_, _) if source_expression == target => replacement.clone(),
         _ => source_expression.clone(),
@@ -449,11 +463,8 @@ fn gen_expression(operand: &Operand, data: &MirData) -> Expression {
 }
 
 fn parse_condition(condition: String) -> Expression {
-    condition_parser::parse_Condition(&*condition).unwrap_or_else(|e| {
-                                                                      error!("Error parsing condition `{}` with error `{:?}`",
-                                                                             condition,
-                                                                             e)
-                                                                  })
+    condition_parser::parse_Condition(&*condition)
+        .unwrap_or_else(|e| error!("Error parsing condition `{}` with error `{:?}`", condition, e))
 }
 
 fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
@@ -539,12 +550,18 @@ impl Pred2SMT for SMTLib2<QFAUFBV> {
                     BinaryOperator::BitwiseOr => self.assert(core::OpCodes::Or, &[l, r]),
                     BinaryOperator::BitwiseAnd => self.assert(core::OpCodes::And, &[l, r]),
                     BinaryOperator::BitwiseXor => self.assert(core::OpCodes::Xor, &[l, r]),
-                    BinaryOperator::BitwiseLeftShift => self.assert(bitvec::OpCodes::BvShl, &[l, r]),
-                    BinaryOperator::BitwiseRightShift => self.assert(bitvec::OpCodes::BvAShr, &[l, r]),
+                    BinaryOperator::BitwiseLeftShift => {
+                        self.assert(bitvec::OpCodes::BvShl, &[l, r])
+                    }
+                    BinaryOperator::BitwiseRightShift => {
+                        self.assert(bitvec::OpCodes::BvAShr, &[l, r])
+                    }
                     BinaryOperator::LessThan => self.assert(bitvec::OpCodes::BvSLt, &[l, r]),
                     BinaryOperator::LessThanOrEqual => self.assert(bitvec::OpCodes::BvSLe, &[l, r]),
                     BinaryOperator::GreaterThan => self.assert(bitvec::OpCodes::BvSGt, &[l, r]),
-                    BinaryOperator::GreaterThanOrEqual => self.assert(bitvec::OpCodes::BvSGe, &[l, r]),
+                    BinaryOperator::GreaterThanOrEqual => {
+                        self.assert(bitvec::OpCodes::BvSGe, &[l, r])
+                    }
                     BinaryOperator::Equal |
                     BinaryOperator::BiImplication => self.assert(core::OpCodes::Cmp, &[l, r]),
                     BinaryOperator::NotEqual => {
@@ -554,7 +571,9 @@ impl Pred2SMT for SMTLib2<QFAUFBV> {
                     BinaryOperator::And => self.assert(core::OpCodes::And, &[l, r]),
                     BinaryOperator::Or => self.assert(core::OpCodes::Or, &[l, r]),
                     BinaryOperator::Xor => return self.assert(core::OpCodes::Xor, &[l, r]),
-                    BinaryOperator::Implication => return self.assert(core::OpCodes::Imply, &[l, r]),
+                    BinaryOperator::Implication => {
+                        return self.assert(core::OpCodes::Imply, &[l, r])
+                    }
                 }
             }
             Expression::UnaryExpression(ref op, ref e) => {
@@ -577,7 +596,9 @@ impl Pred2SMT for SMTLib2<QFAUFBV> {
                              })
             }
             Expression::BooleanLiteral(ref b) => self.new_const(core::OpCodes::Const(*b)),
-            Expression::BitVector(ref value, ref size) => bv_const!(self, *value as u64, bitvector_size(*size)),
+            Expression::BitVector(ref value, ref size) => {
+                bv_const!(self, *value as u64, bitvector_size(*size))
+            }
         }
     }
 }
