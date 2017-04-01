@@ -3,6 +3,21 @@ name = "stanley"
 version = "0.1.0"
 license = "MIT/Apache-2.0"
 authors = ["Daniel Lockyer <thisisdaniellockyer@gmail.com>"]
+build = "build.rs"
+
+[lib]
+crate-type = ["dylib"]
+plugin = true
 
 [dependencies]
-stanlib = { path = "stanley-lib" }
+z3 = "0.2.0"
+regex = "0.2.1"
+#rustproof-libsmt = "0.1.0"
+rustproof-libsmt = { path = "../libsmt.rs/" }
+petgraph = "0.2.7"
+
+[build-dependencies.lalrpop]
+version = "0.12.5"
+
+[dependencies.lalrpop-util]
+version = "0.12.5"

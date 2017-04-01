@@ -25,6 +25,7 @@ extern crate petgraph;
 extern crate regex;
 extern crate syntax;
 extern crate rustc;
+extern crate rustc_driver;
 extern crate rustc_plugin;
 extern crate rustc_trans;
 extern crate rustc_data_structures;
@@ -59,7 +60,6 @@ struct StanleyMir;
 pub struct MirData<'tcx> {
     block_data: Vec<&'tcx BasicBlockData<'tcx>>,
     mir: &'tcx Mir<'tcx>,
-    func_return_type: Ty<'tcx>,
 }
 
 impl <'tcx> Pass for StanleyMir {}
@@ -82,8 +82,7 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
 
         let mut data = MirData {
             block_data: Vec::new(),
-            mir: mir,
-            func_return_type: mir.return_ty
+            mir: mir
         };
 
         for block in mir.basic_blocks() {
@@ -99,9 +98,9 @@ impl <'tcx> MirPass<'tcx> for StanleyMir {
         let weakest_precondition = gen(0, 0, &data, &post_string_expression);
 
         let verification_condition = Expression::BinaryExpression(
-            Box::new(pre_string_expression.clone()),
+            Box::new(pre_string_expression),
             ast::BinaryOperator::Implication,
-            Box::new(weakest_precondition.clone()),
+            Box::new(weakest_precondition),
         );
 
         run_solver(&verification_condition, &name);
@@ -166,9 +165,9 @@ fn gen(index: usize, depth: usize, data: &MirData, post_expression: &Expression)
             let not_condition = Expression::UnaryExpression(UnaryOperator::Not, Box::new(condition.clone()));
 
             wp = Expression::BinaryExpression(
-                Box::new(Expression::BinaryExpression(Box::new(condition.clone()), BinaryOperator::Implication, Box::new(wp_if))),
+                Box::new(Expression::BinaryExpression(Box::new(condition), BinaryOperator::Implication, Box::new(wp_if))),
                 ast::BinaryOperator::And,
-                Box::new(Expression::BinaryExpression(Box::new(not_condition.clone()), BinaryOperator::Implication, Box::new(wp_else)))
+                Box::new(Expression::BinaryExpression(Box::new(not_condition), BinaryOperator::Implication, Box::new(wp_else)))
             );
         },
         TerminatorKind::DropAndReplace{..} | TerminatorKind::Drop{..} | TerminatorKind::Unreachable |
@@ -200,7 +199,7 @@ fn gen_lvalue(lvalue: Lvalue, data: &MirData) -> Expression {
                 Expression::VariableMapping(gen_name!("tmp", index), ast::string_to_type(ty))
             },
             LocalKind::Var => Expression::VariableMapping(gen_name!("var", index), ast::string_to_type(data.mir.local_decls[index].ty.to_string())),
-            LocalKind::ReturnPointer => Expression::VariableMapping("ret".to_string(), ast::type_to_enum(data.func_return_type)),
+            LocalKind::ReturnPointer => Expression::VariableMapping("ret".to_string(), ast::type_to_enum(data.mir.return_ty)),
         },
         Lvalue::Projection(pro) => {
             let lvalue_name;
@@ -337,7 +336,7 @@ fn walk_and_replace(expression: Expression, data: &MirData) -> Expression {
 
             if bb == Types::Unknown {
                 if aa == "ret" {
-                    bb = ast::type_to_enum(data.func_return_type);
+                    bb = ast::type_to_enum(data.mir.return_ty);
                 } else {
                     for arg in data.mir.args_iter() {
                         let arg2 = &data.mir.local_decls[arg];
@@ -400,7 +399,7 @@ fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
     let mut post_string = "".to_string();
 
     for attr in attrs {
-        if let MetaItemKind::List(ref items) = (*attr).value.node {
+        if let Some(ref items) = attr.meta_item_list() {
             for item in items {
                 if let NestedMetaItemKind::MetaItem(ref i_string) = item.node {
                     if let MetaItemKind::NameValue(ref literal) = i_string.node {
