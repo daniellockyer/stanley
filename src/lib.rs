@@ -97,7 +97,29 @@ impl<'tcx> MirPass<'tcx> for StanleyMir {
 
         let verification_condition = Expression::BinaryExpression(Box::new(pre_string_expression), ast::BinaryOperator::Implication, Box::new(weakest_precondition));
 
-        run_solver(&verification_condition, &name);
+        let mut z3: z3::Z3 = Default::default();
+        let mut solver = SMTLib2::new(Some(QFAUFBV));
+        let simplified_condition = ast::simplify_expression(&verification_condition);
+        let vcon = solver.expr2smtlib(&simplified_condition);
+        let _ = solver.assert(core::OpCodes::Not, &[vcon]);
+        let (_, check) = solver.solve(&mut z3, false);
+
+        match check {
+            SMTRes::Sat(_, ref model) => {
+                let re = Regex::new(r".+(\(define-fun\s+([a-zA-Z0-9]+).*\s+#x([0-9a-f]+)\))+").unwrap();
+                let text = model.clone().unwrap();
+
+                println!("!! [INVALID] -- {}", name);
+                /*println!("{:?}", verification_condition);
+                println!("{:?}", simplified_condition);*/
+
+                for cap in re.captures_iter(&text) {
+                    println!("   {:7} = {:10?} (0x{})", &cap[2], i64::from_str_radix(&cap[3], 16).unwrap(), &cap[3]);
+                }
+            }
+            SMTRes::Unsat(..) => println!("[VALID] -- {}", name),
+            SMTRes::Error(ref error, _) => println!("[ERROR]\n{}\n", error),
+        }
     }
 }
 
@@ -463,32 +485,6 @@ fn parse_attributes(attrs: &[Attribute]) -> (String, String) {
     }
 
     (pre_string, post_string)
-}
-
-pub fn run_solver(verification_condition: &Expression, name: &String) {
-    let mut z3: z3::Z3 = Default::default();
-    let mut solver = SMTLib2::new(Some(QFAUFBV));
-    let simplified_condition = ast::simplify_expression(&verification_condition);
-    let vcon = solver.expr2smtlib(&simplified_condition);
-    let _ = solver.assert(core::OpCodes::Not, &[vcon]);
-    let (_, check) = solver.solve(&mut z3, false);
-
-    match check {
-        SMTRes::Sat(_, ref model) => {
-            let re = Regex::new(r".+(\(define-fun\s+([a-zA-Z0-9]+).*\s+#x([0-9a-f]+)\))+").unwrap();
-            let text = model.clone().unwrap();
-
-            println!("!! [INVALID] -- {}", name);
-            /*println!("{:?}", verification_condition);
-            println!("{:?}", simplified_condition);*/
-
-            for cap in re.captures_iter(&text) {
-                println!("   {:7} = {:10?} (0x{})", &cap[2], i64::from_str_radix(&cap[3], 16).unwrap(), &cap[3]);
-            }
-        }
-        SMTRes::Unsat(..) => println!("[VALID] -- {}", name),
-        SMTRes::Error(ref error, _) => println!("[ERROR]\n{}\n", error),
-    }
 }
 
 pub trait Pred2SMT {
