@@ -10,13 +10,13 @@ crate-type = ["dylib"]
 plugin = true
 
 [dependencies]
-regex = "0.2.1"
-#rustproof-libsmt = "0.1.0"
-rustproof-libsmt = { path = "../libsmt.rs/" }
+regex = "0.2"
+rustproof-libsmt = "0.1.0"
+#rustproof-libsmt = { path = "../libsmt.rs/" }
 petgraph = "0.2.7"
 
 [build-dependencies.lalrpop]
-version = "0.12.5"
+version = "0.13.0"
 
 [dependencies.lalrpop-util]
-version = "0.12.5"
+version = "0.13.0"

@@ -99,7 +99,7 @@ impl<'tcx> MirPass<'tcx> for StanleyMir {
                                                                   Box::new(weakest_precondition));
 
         let mut z3: z3::Z3 = Default::default();
-        let mut solver = SMTLib2::new(Some(QFAUFBV));
+        let mut solver = SMTLib2::new(Some(QF_AUFBV));
         let simplified_condition = ast::simplify_expression(&verification_condition);
         let vcon = solver.expr2smtlib(&simplified_condition);
         let _ = solver.assert(core::OpCodes::Not, &[vcon]);
@@ -534,9 +534,9 @@ pub trait Pred2SMT {
     fn expr2smtlib(&mut self, &Expression) -> Self::Idx;
 }
 
-impl Pred2SMT for SMTLib2<QFAUFBV> {
+impl Pred2SMT for SMTLib2<QF_AUFBV> {
     type Idx = NodeIndex;
-    type Logic = QFAUFBV;
+    type Logic = QF_AUFBV;
 
     fn expr2smtlib(&mut self, vc: &Expression) -> Self::Idx {
         match *vc {
@@ -587,9 +587,9 @@ impl Pred2SMT for SMTLib2<QFAUFBV> {
                 }
             }
             Expression::VariableMapping(ref v, ref ty) => {
-                if self.contains_mapping(&v) {
-                    return self.get_by_name(&v);
-                }
+                //if self.contains_mapping(&v) {
+                //    return self.get_by_name(&v);
+                //}
 
                 self.new_var(Some(&v),
                              match *ty {
