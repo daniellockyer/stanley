@@ -10,7 +10,7 @@ crate-type = ["dylib"]
 plugin = true
 
 [dependencies]
-regex = "0.2"
+regex = "1.3"
 rustproof-libsmt = "0.1.0"
 #rustproof-libsmt = { path = "../libsmt.rs/" }
 petgraph = "0.2.7"
