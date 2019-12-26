@@ -13,7 +13,7 @@ plugin = true
 regex = "0.2"
 rustproof-libsmt = "0.1.0"
 #rustproof-libsmt = { path = "../libsmt.rs/" }
-petgraph = "0.2.7"
+petgraph = "0.5.0"
 
 [build-dependencies.lalrpop]
 version = "0.13.0"
