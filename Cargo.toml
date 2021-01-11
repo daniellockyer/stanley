@@ -19,4 +19,4 @@ petgraph = "0.2.7"
 version = "0.13.0"
 
 [dependencies.lalrpop-util]
-version = "0.13.0"
+version = "0.19.4"
