@@ -1,0 +1,14 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: lalrpop-util
+    versions:
+    - 0.19.4
+  - dependency-name: lalrpop
+    versions:
+    - 0.19.4
